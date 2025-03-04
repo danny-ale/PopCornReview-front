@@ -1,0 +1,89 @@
+.body-home{
+    background-color: black;
+    color: aliceblue;
+}
+
+.navbar{
+  background-color:#FFCC00;
+}
+
+.navbar span{
+  font-weight: 800;
+  color:black;
+  font-size:medium;
+  padding-left: 5px;
+}
+
+.navbar img{
+  padding: 7px;
+  width: 70px;
+  height: 70px;
+}
+
+.wsd{
+  width: 60%;
+}
+
+.searchInput{
+    width: 70%;
+    padding: 10px;
+    border: 2px solid rgba(59, 25, 0, 0.985);
+    border-radius: 20px;
+    background: rgb(214, 214, 214);
+    color: rgb(19, 19, 19);
+    font-size: 16px;
+}
+
+.hero-section {
+    background: url('https://static.vecteezy.com/system/resources/previews/002/236/321/non_2x/movie-trendy-banner-vector.jpg') no-repeat center center/cover;
+    padding: 100px 20px;
+  }
+
+  .carousel-caption {
+    background: #0D0D0D;
+    padding: 15px;
+    border-radius: 8px;
+    width: 60%;
+    left: 10%;
+    transform: translateX(10%); 
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center; 
+    text-align: center; 
+}
+
+.carousel-caption .Banner {
+    background-color:#FFCC00;
+    width: 30px;
+    height: 130px;
+}
+
+.carousel-caption .TextBanner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    flex: 1; 
+    text-align: center; 
+    padding-left: 10px; 
+}
+
+.Titlees{
+    text-align: center;
+    color: #FFCC00;
+    font-weight: 800;
+    padding: 30px;
+}
+
+.SubTitles{
+  font-weight:200;
+  font-size:medium;
+}
+  
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+  }
+  

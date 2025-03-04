@@ -1,0 +1,170 @@
+span{
+    color: #ffffff;
+}
+
+.body-content{
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(90deg, #343442 0%, #49495c 100%);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 50px;
+    margin: 0;
+    overflow: hidden;
+}
+
+.content{
+    background-color: #181824 ;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    width: calc(100vw - 100px);
+    height: calc(100vh - 100px); 
+    max-width: 100%;
+}
+
+.logotipo{
+ align-items: center;
+ justify-content: center;
+ display: flex;
+}
+
+.logotipo img{
+ width: 8%;
+ height: 8%;
+}
+.logotipo span{
+    color: rgb(240, 248, 255);
+    text-align: center;
+    font-size:medium;
+    font-weight: bolder;
+}
+
+.Titles{
+    color: aliceblue;
+    text-align: center;
+    font-size:xx-large;
+    font-weight: bolder;
+}
+
+.SubTitles{
+    color: aliceblue;
+    text-align: center;
+    font-size:larger;
+    font-weight:400;
+}
+
+.Text{
+    color: aliceblue;
+    text-align:start;
+    font-size:larger;
+    font-weight:100;
+}
+
+.SubText{
+    color:rgba(240, 248, 255, 0.644);
+    text-align:start;
+    font-size:medium;
+    font-weight:100;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.input-container input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: aliceblue;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+}
+
+.input-container input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.input-container input:focus {
+    border-color: white;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+
+.right-box{
+    padding: 50px 40px 50px 50px;
+}
+
+.switch-content{
+    position: absolute;
+    top: 0;
+    right:50%;
+    height: 100%; 
+    width: 50%;
+    overflow: hidden;
+    transition: all 0.6s ease-in-out;
+    border-radius: 0 60px 60px 0;
+    z-index: 1000;
+}
+
+.content.active .switch-content{
+    transform:translateX(100%);
+    border-radius: 60px 0 0 60px;
+}
+
+.switch{
+    background-image: url("https://unika.fm/wp-content/uploads/2018/08/sala-de-cine.jpg");
+    background-repeat: no-repeat;
+    height: 100%;
+    color: aliceblue;
+    position: relative;
+    left: -100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+.content.active .switch{
+    transform:translateX(50%);
+}
+
+.switch-panel{
+    position:absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 30px;
+    text-align: center;
+    top:0;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+.switch-left{
+    transform: translateX(-200%);
+}
+
+.content.active .switch-left{
+    transform: translateX(0);
+}
+
+.switch-right{
+    right: 0;
+    transform: translateX(0);
+}
+
+.content.active .switch-right{
+    transform: translateX(200%);
+}
