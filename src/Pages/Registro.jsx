@@ -4,6 +4,9 @@ import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import '../css/LoginPageCSS.css'
 import Logo from '../Images/logo.png'
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Bounce } from "react-toastify";
 
 
 function Registro() {
@@ -112,13 +115,45 @@ function Registro() {
           if (response.data.msg === "Encontrado"){
             setEmail('');
             setPass('');
-            alert("Iniciando Sesion");
+            toast.success('Inicio de Sesiòn Exitoso', {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: false,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+              transition: Bounce,
+              });
             navg("/Home");
-          }else if(response.data.msg === "Contraseña incorrecta"){
-            alert("Contraseña incorrecta");
+          }if(response.data.msg === "Contraseña incorrecta"){
+            toast.warn('Contraseña incorrecta', {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: false,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+              transition: Bounce,
+              });
           }
-           else if(response.data.msg === "No Encontrado"){
-            alert("Usuario no encontrado");
+           if(response.data.msg === "No encontrado"){
+            toast.error("Usuario no encontrado", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              newestOnTop: false,
+              closeOnClick: false,
+              rtl: false,
+              pauseOnFocusLoss: true,
+              draggable: true,
+              pauseOnHover: true,
+              theme: "dark",
+              transition: Bounce
+            });
           }
           
 

@@ -3,6 +3,8 @@ import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import Registro from './Pages/Registro';
 import Imagenes from './Pages/Imagenes';
 import Home from './Pages/Home';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return(
@@ -13,7 +15,9 @@ function App() {
     <Route path='/Imagenes' element={<Imagenes/>}></Route>
     <Route path='/' element={<Home/>}></Route>
     </Routes>
+    <ToastContainer />
   </BrowserRouter>
+  
   )
 }
 
