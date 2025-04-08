@@ -1,0 +1,78 @@
+import React, { useState } from 'react';
+import '../css/CrearCategoria.css';
+
+
+export default function CrearCategoria() {
+    const [formData, setFormData] = useState({
+        nombre: '',
+        descripcion: ''
+    });
+
+    const [errors, setErrors] = useState({});
+
+    const validateForm = () => {
+        const newErrors = {};
+        
+        if (!formData.nombre.trim()) {
+            newErrors.nombre = 'El nombre es requerido';
+        } else if (formData.nombre.length < 3) {
+            newErrors.nombre = 'El nombre debe tener al menos 3 caracteres';
+        }
+        
+        if (!formData.descripcion.trim()) {
+            newErrors.descripcion = 'La descripción es requerida';
+        } else if (formData.descripcion.length < 10) {
+            newErrors.descripcion = 'La descripción debe tener al menos 10 caracteres';
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (validateForm()) {
+            console.log('Formulario válido:', formData);
+            // Aquí iría la lógica para enviar los datos al servidor
+        }
+    };
+
+    return (
+        <div className="form-container">
+            <h1>Crear categoría</h1>
+            
+            <form onSubmit={handleSubmit} className="form-fields">
+                <label htmlFor="nombre">Nombre</label>
+                <input 
+                    type="text" 
+                    id="nombre" 
+                    name="nombre" 
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    className={errors.nombre ? 'error' : ''}
+                />
+                {errors.nombre && <p className="error-message">{errors.nombre}</p>}
+                
+                <label htmlFor="descripcion">Descripción</label>
+                <textarea 
+                    id="descripcion" 
+                    name="descripcion" 
+                    value={formData.descripcion}
+                    onChange={handleChange}
+                    className={errors.descripcion ? 'error' : ''}
+                />
+                {errors.descripcion && <p className="error-message">{errors.descripcion}</p>}
+                
+                <button type="submit" className="submit-button">Crear categoría</button>
+            </form>
+        </div>
+    );
+};

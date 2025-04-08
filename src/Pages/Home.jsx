@@ -91,7 +91,7 @@ export default function Home() {
           </Carousel>
         </Container>
 
-        <Container className="mt-4">
+        <Container className="mt-4 d-flex flex-column">
           <h2 className="Titlees">Películas Más Recomendadas</h2>
           <Row>
             {[
@@ -124,7 +124,7 @@ export default function Home() {
           </Row>
         </Container>
 
-        <Container className="mt-4">
+        <Container className="mt-4 d-flex flex-column">
           <h2 className="Titlees">Películas Mejor Calificadas</h2>
           <Row>
             {[
@@ -157,7 +157,7 @@ export default function Home() {
           </Row>
         </Container>
 
-        <Container className="mt-4">
+        <Container className="mt-4 d-flex flex-column">
           <h2 className="Titlees">Películas Que Te Pueden Gustar</h2>
           <Row>
             <ul className="list-group bg-dark text-white">

@@ -1,0 +1,94 @@
+body {
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.form-container {
+    background-color: #222222;
+    color: white;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 1000px;
+    padding: 30px;
+    margin: 50px auto;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Título grande al principio */
+.form-container h1 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    font-weight: bold;
+    text-align: left;
+    width: 100%;
+}
+
+/* Contenedor del formulario */
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: left;
+}
+
+.form-fields label {
+    margin: 10px 0;
+    font-size: 18px;
+    display: inline-block;
+}
+
+.form-fields input, 
+.form-fields textarea {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #8B0000;
+    font-size: 16px;
+    color: white;
+    background-color: #333;
+    width: 100%;
+}
+
+.form-fields textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.submit-button {
+    background-color: #8B0000;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+    margin-top: 20px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #a50000;
+}
+
+
+.error-message {
+    color: #ff6b6b;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.form-fields input.error,
+.form-fields textarea.error {
+    border-color: #ff6b6b;
+}
