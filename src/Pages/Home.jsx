@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Carousel, Form, ListGroup, Badge } from 'react-bootstrap';
-import { FaComment, FaEdit, FaSearch, FaUser,  FaThumbsUp, FaThumbsDown, FaStar,FaFire, FaCrown} from 'react-icons/fa';
+import { Container, Row, Col, Card, Button, Carousel, Form, ListGroup, Badge, Dropdown, NavDropdown } from 'react-bootstrap';
+import { FaComment, FaEdit, FaSearch, FaUser,  FaThumbsUp, FaThumbsDown, FaStar,FaFire, FaCrown, FaTags, FaFilm, FaSignOutAlt} from 'react-icons/fa';
 import '../css/HomePageCSS.css';
 import Logo2 from '../Images/Logooo.jpg';
 
 export default function Home() {
   const [search, setSearch] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const navigate = useNavigate(); 
 
   const handleSearchChange = (e) => {
@@ -21,10 +22,6 @@ export default function Home() {
     }
   };
 
-  const navigateToLogin = () => {
-    navigate('/login');
-  };
-
   const navigateToMovie = (movieId) => {
     //navigate(`/movie/${movieId}`);
     navigate('/movie');
@@ -33,6 +30,16 @@ export default function Home() {
   const navigateToReviewForm = (movieId) => {
     //navigate(`/movies/${movieId}/review/new`);
     navigate('/movie');
+  };
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    navigate('/login');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    navigate('/');
   };
 
   const recommendedMovies = [
@@ -65,38 +72,89 @@ export default function Home() {
     <div className='body-home'>
       <div className="d-flex flex-column min-vh-100">  
 
-        <nav className='navbar navbar-expand-lg navbar-dark bg-dark py-3'>
-          <Container>
-            <div className='d-flex align-items-center'>
-              <img src={Logo2} alt='Logo' className='logo-img me-2' />
-              <span className='navbar-brand fw-bold'>PopCorn Review</span>
-            </div>
+      <nav className='navbar navbar-expand-lg navbar-dark bg-dark py-3'>
+      <Container>
+        <div className='d-flex align-items-center'>
+          <img src={Logo2} alt='Logo' className='logo-img me-2' />
+          <span 
+            className='navbar-brand fw-bold cursor-pointer' 
+            onClick={() => navigate('/')}
+          >
+            PopCorn Review
+          </span>
+        </div>
 
-            <Form className="mx-4 flex-grow-1" onSubmit={handleSearchSubmit}>
-              <div className="input-group search-container">
-                <Form.Control
-                  type="text"
-                  className="search-input"
-                  placeholder="Buscar películas..."
-                  value={search}
-                  onChange={handleSearchChange}
-                />
-                <Button variant="danger" type="submit" className="search-button">
-                  <FaSearch />
-                </Button>
-              </div>
-            </Form>
-
-            <Button 
-              variant="outline-light" 
-              onClick={navigateToLogin}
-              className="d-flex align-items-center"
-            >
-              <FaUser className="me-2" />
-              Iniciar Sesión
+        <Form className="mx-4 flex-grow-1" onSubmit={handleSearchSubmit}>
+          <div className="input-group search-container">
+            <Form.Control
+              type="text"
+              className="search-input"
+              placeholder="Buscar películas..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <Button variant="danger" type="submit" className="search-button">
+              <FaSearch />
             </Button>
-          </Container>
-        </nav>
+          </div>
+        </Form>
+
+        {isLoggedIn ? (
+          <Dropdown align="end">
+            <Dropdown.Toggle variant="dark" id="dropdown-user">
+              <div className="d-flex align-items-center">
+                <FaUser className="me-2" />
+                <span>Mi Perfil</span>
+              </div>
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu className="dropdown-menu-dark">
+              <Dropdown.Item onClick={() => navigate('/Perfil')}>
+                <div className="d-flex align-items-center">
+                  <FaUser className="me-2" />
+                  Ver Perfil
+                </div>
+              </Dropdown.Item>
+              
+              <Dropdown.Divider />
+              
+              <NavDropdown title="Crear" id="create-dropdown" className="dropdown-submenu">
+                <Dropdown.Item onClick={() => navigate('/CrearPelicula')}>
+                  <div className="d-flex align-items-center">
+                    <FaFilm className="me-2" />
+                    Nueva Película
+                  </div>
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => navigate('/CrearCategoria')}>
+                  <div className="d-flex align-items-center">
+                    <FaTags className="me-2" />
+                    Nueva Categoría
+                  </div>
+                </Dropdown.Item>
+              </NavDropdown>
+              
+              <Dropdown.Divider />
+              
+              <Dropdown.Item onClick={handleLogout}>
+                <div className="d-flex align-items-center text-danger">
+                  <FaSignOutAlt className="me-2" />
+                  Cerrar Sesión
+                </div>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        ) : (
+          <Button 
+            variant="outline-light" 
+            onClick={handleLogin}
+            className="d-flex align-items-center"
+          >
+            <FaUser className="me-2" />
+            Iniciar Sesión
+          </Button>
+        )}
+      </Container>
+    </nav>
 
         <Carousel fade className="hero-carousel">
           {carouselItems.map((item, index) => (

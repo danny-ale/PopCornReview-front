@@ -1,3 +1,43 @@
+/* Estilos para el menú desplegable */
+.dropdown-menu-dark {
+  background-color: #252525;
+  border: 1px solid #444;
+}
+
+.dropdown-item {
+  color: #eee;
+  padding: 0.5rem 1rem;
+}
+
+.dropdown-item:hover {
+  background-color: #8B0000;
+  color: white;
+}
+
+.dropdown-divider {
+  border-color: #444;
+}
+
+/* Submenú desplegable */
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -1px;
+}
+
+/* Efecto hover para el navbar brand */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-pointer:hover {
+  opacity: 0.8;
+}
+
 /* Estilos para el paginador */
 .pagination {
     margin-top: 2rem;

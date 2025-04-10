@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Form, Badge, Pagination, Dropdown } from 'react-bootstrap';
-import { FaSearch, FaUser, FaThumbsUp, FaThumbsDown, FaFire, FaSort, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
+import { Container, Row, Col, Card, Button, Form, Badge, Pagination, Dropdown, NavDropdown } from 'react-bootstrap';
+import { FaSearch, FaUser,  FaThumbsUp, FaThumbsDown,FaFire, FaTags, FaFilm, FaSignOutAlt, FaSort, FaSortAmountDown, FaSortAmountUp} from 'react-icons/fa';
 import Logo2 from '../Images/Logooo.jpg';
 import '../css/HomePageCSS.css';
 
@@ -95,6 +95,8 @@ export default function SearchResults() {
   const [itemsPerPage] = useState(4);
   const [sortOption, setSortOption] = useState('relevance');
   const [sortDirection, setSortDirection] = useState('desc');
+    const [search, setSearch] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const params = new URLSearchParams(location.search);
   const query = params.get("query")?.toLowerCase() || "";
@@ -156,6 +158,15 @@ export default function SearchResults() {
     navigate('/');
   }
 
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    navigate('/login');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    navigate('/');
+  };
 
   const handleSort = (option) => {
     if (sortOption === option) {
@@ -201,37 +212,88 @@ export default function SearchResults() {
     <div className="body-home">
       {/* Navbar */}
       <nav className='navbar navbar-expand-lg navbar-dark bg-dark py-3'>
-        <Container>
-          <div className='d-flex align-items-center' onClick={() => navigateToHome()}>
-            <img src={Logo2} alt='Logo' className='logo-img me-2' />
-            <span className='navbar-brand fw-bold'>PopCorn Review</span>
+      <Container>
+        <div className='d-flex align-items-center'>
+          <img src={Logo2} alt='Logo' className='logo-img me-2' />
+          <span 
+            className='navbar-brand fw-bold cursor-pointer' 
+            onClick={() => navigate('/')}
+          >
+            PopCorn Review
+          </span>
+        </div>
+
+        <Form className="mx-4 flex-grow-1" onSubmit={handleSearchSubmit}>
+          <div className="input-group search-container">
+            <Form.Control
+              type="text"
+              className="search-input"
+              placeholder="Buscar películas..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <Button variant="danger" type="submit" className="search-button">
+              <FaSearch />
+            </Button>
           </div>
+        </Form>
 
-          <Form className="mx-4 flex-grow-1" onSubmit={handleSearchSubmit}>
-            <div className="input-group search-container">
-              <Form.Control
-                type="text"
-                name="search"
-                className="search-input"
-                placeholder="Buscar películas..."
-                defaultValue={query}
-              />
-              <Button variant="danger" type="submit" className="search-button">
-                <FaSearch />
-              </Button>
-            </div>
-          </Form>
+        {isLoggedIn ? (
+          <Dropdown align="end">
+            <Dropdown.Toggle variant="dark" id="dropdown-user">
+              <div className="d-flex align-items-center">
+                <FaUser className="me-2" />
+                <span>Mi Perfil</span>
+              </div>
+            </Dropdown.Toggle>
 
-          <Button
-            variant="outline-light"
-            onClick={navigateToLogin}
+            <Dropdown.Menu className="dropdown-menu-dark">
+              <Dropdown.Item onClick={() => navigate('/Perfil')}>
+                <div className="d-flex align-items-center">
+                  <FaUser className="me-2" />
+                  Ver Perfil
+                </div>
+              </Dropdown.Item>
+              
+              <Dropdown.Divider />
+              
+              <NavDropdown title="Crear" id="create-dropdown" className="dropdown-submenu">
+                <Dropdown.Item onClick={() => navigate('/CrearPelicula')}>
+                  <div className="d-flex align-items-center">
+                    <FaFilm className="me-2" />
+                    Nueva Película
+                  </div>
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => navigate('/CrearCategoria')}>
+                  <div className="d-flex align-items-center">
+                    <FaTags className="me-2" />
+                    Nueva Categoría
+                  </div>
+                </Dropdown.Item>
+              </NavDropdown>
+              
+              <Dropdown.Divider />
+              
+              <Dropdown.Item onClick={handleLogout}>
+                <div className="d-flex align-items-center text-danger">
+                  <FaSignOutAlt className="me-2" />
+                  Cerrar Sesión
+                </div>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        ) : (
+          <Button 
+            variant="outline-light" 
+            onClick={handleLogin}
             className="d-flex align-items-center"
           >
             <FaUser className="me-2" />
             Iniciar Sesión
           </Button>
-        </Container>
-      </nav>
+        )}
+      </Container>
+    </nav>
 
       {/* Resultados de búsqueda */}
       <Container className="my-5 d-flex flex-column">
