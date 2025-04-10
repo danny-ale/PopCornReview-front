@@ -129,190 +129,194 @@ export default function MovieDetail() {
 
   return (
     <div className="body-home">
-      <Container className="py-4">
-        <Button variant="outline-light" onClick={handleBack} className="mb-4">
-          <FaArrowLeft className="me-2" /> Volver
-        </Button>
+       <div className="d-flex flex-row">
+         <div className='py-5 px-4'>
+            <Button variant="light" onClick={handleBack} className="w-2">
+            <FaArrowLeft className="me-2" /> Volver 
+            </Button>
+         </div>
+        <Container className="py-4 d-flex flex-column">
 
-        {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" variant="light" />
-          </div>
-        ) : (
-          <>
-            <Row className="mb-4">
-              <Col lg={4} className="mb-4 mb-lg-0">
-                <Card className="bg-dark text-white border-light">
-                  <Card.Img variant="top" src={movie.image} alt={movie.title} />
-                  <Card.Body className="text-center">
-                    <Badge bg="danger" className="fs-5 mb-2">
-                      {movie.rating.toFixed(1)}/5.0
-                    </Badge>
-                    <div className="mb-2">
-                      {renderStars(Math.round(movie.rating))}
-                    </div>
-                    <Badge bg="success" className="fs-6">
-                      {movie.approval}% de aprobación
-                    </Badge>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col lg={8}>
-                <Card className="bg-dark text-white border-light h-100">
-                  <Card.Body>
-                    <Card.Title as="h1" className="mb-3">{movie.title} ({movie.year})</Card.Title>
-                    
-                    <div className="d-flex flex-wrap gap-2 mb-3">
-                      {movie.genre.map((g, i) => (
-                        <Badge key={i} bg="secondary">{g}</Badge>
-                      ))}
-                      <Badge bg="info">{movie.duration}</Badge>
-                    </div>
-                    
-                    <Card.Subtitle className="mb-3 text-muted">Director: {movie.director}</Card.Subtitle>
-                    
-                    <Tabs
-                      activeKey={activeTab}
-                      onSelect={(k) => setActiveTab(k)}
-                      className="mb-3"
-                      fill
-                    >
-                      <Tab eventKey="details" title="Detalles">
-                        <div className="mt-3">
-                          <h5 className="mb-3">Sinopsis</h5>
-                          <p>{movie.synopsis}</p>
-                          
-                          <h5 className="mb-3 mt-4">Reparto</h5>
-                          <Row>
-                            {movie.cast.map((person, i) => (
-                              <Col key={i} sm={6} md={4} className="mb-2">
-                                <strong>{person.name}</strong> como {person.role}
-                              </Col>
-                            ))}
-                          </Row>
+            {loading ? (
+            <div className="text-center py-5">
+                <Spinner animation="border" variant="light" />
+            </div>
+            ) : (
+            <>
+                <Row className="mb-4">
+                <Col lg={4} className="mb-4 mb-lg-0">
+                    <Card className="bg-dark text-white border-light">
+                    <Card.Img variant="top" src={movie.image} alt={movie.title} />
+                    <Card.Body className="text-center">
+                        <Badge bg="danger" className="fs-5 mb-2">
+                        {movie.rating.toFixed(1)}/5.0
+                        </Badge>
+                        <div className="mb-2 text-warning">
+                        {renderStars(Math.round(movie.rating))}
                         </div>
-                      </Tab>
-                      <Tab eventKey="reviews" title={`Reseñas (${reviews.length})`}>
-                        <div className="mt-3">
-                          {reviews.length > 0 ? (
-                            <ListGroup variant="flush">
-                              {reviews.map((r) => (
-                                <ListGroup.Item key={r.id} className="bg-dark text-white border-secondary">
-                                  <div className="d-flex justify-content-between mb-2">
-                                    <div>
-                                      <strong>{r.author}</strong> - {r.date}
-                                    </div>
-                                    <div className="text-warning">
-                                      {renderStars(r.rating)}
-                                    </div>
-                                  </div>
-                                  <p>{r.comment}</p>
-                                  
-                                  <div className="d-flex align-items-center mb-3">
-                                    <Button variant="outline-success" size="sm" className="me-2">
-                                      <FaThumbsUp className="me-1" /> {r.likes}
-                                    </Button>
-                                    <Button variant="outline-danger" size="sm" className="me-3">
-                                      <FaThumbsDown className="me-1" /> {r.dislikes}
-                                    </Button>
-                                  </div>
-                                  
-                                  <h6 className="mb-2">Comentarios:</h6>
-                                  {r.userComments.length > 0 ? (
-                                    <ListGroup variant="flush" className="mb-3">
-                                      {r.userComments.map((c) => (
-                                        <ListGroup.Item key={c.id} className="bg-secondary text-white mb-2 rounded">
-                                          <div className="d-flex justify-content-between">
-                                            <strong>{c.author}</strong>
-                                            <small className="text-light">{c.date}</small>
-                                          </div>
-                                          <p className="mb-0">{c.comment}</p>
-                                        </ListGroup.Item>
-                                      ))}
-                                    </ListGroup>
-                                  ) : (
-                                    <p className="text-muted">No hay comentarios aún</p>
-                                  )}
-                                  
-                                  <Form onSubmit={(e) => handleCommentSubmit(r.id, e)}>
-                                    <Form.Group className="mb-3">
-                                      <Form.Control
-                                        as="textarea"
-                                        rows={2}
-                                        placeholder="Escribe tu comentario..."
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                        required
-                                      />
-                                    </Form.Group>
-                                    <Button variant="outline-light" size="sm" type="submit">
-                                      <FaEdit className="me-1" /> Comentar
-                                    </Button>
-                                  </Form>
-                                </ListGroup.Item>
-                              ))}
-                            </ListGroup>
-                          ) : (
-                            <Alert variant="info">No hay reseñas aún. Sé el primero en opinar.</Alert>
-                          )}
+                        <Badge bg="success" className="fs-6">
+                        {movie.approval}% de aprobación
+                        </Badge>
+                    </Card.Body>
+                    </Card>
+                </Col>
+                <Col lg={8}>
+                    <Card className="bg-dark text-white border-light h-100">
+                    <Card.Body>
+                        <Card.Title as="h1" className="mb-3">{movie.title} ({movie.year})</Card.Title>
+                        
+                        <div className="d-flex flex-wrap gap-2 mb-3">
+                        {movie.genre.map((g, i) => (
+                            <Badge key={i} bg="secondary">{g}</Badge>
+                        ))}
+                        <Badge bg="danger">{movie.duration}</Badge>
                         </div>
-                      </Tab>
-                    </Tabs>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-            
-            {/* Formulario para nueva reseña */}
-            <Card className="bg-dark text-white border-light mb-4">
-              <Card.Body>
-                <Card.Title as="h4">Escribe tu reseña</Card.Title>
-                <Form onSubmit={handleReviewSubmit}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Calificación:</Form.Label>
-                    <div className="d-flex mb-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Button
-                          key={star}
-                          variant="outline-warning"
-                          type="button"
-                          className="me-2"
-                          onClick={() => handleRatingClick(star)}
+                        
+                        <Card.Subtitle className="mb-3 text-muted">Director: {movie.director}</Card.Subtitle>
+                        
+                        <Tabs
+                        activeKey={activeTab}
+                        onSelect={(k) => setActiveTab(k)}
+                        className="mb-3"
+                        fill
                         >
-                          {star <= review.rating ? <FaStar /> : <FaRegStar />}
-                        </Button>
-                      ))}
-                    </div>
-                  </Form.Group>
-                  
-                  <Form.Group className="mb-3">
-                    <Form.Label>Reseña:</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      placeholder="Escribe tu opinión sobre la película..."
-                      value={review.comment}
-                      onChange={(e) => setReview({...review, comment: e.target.value})}
-                      required
-                    />
-                  </Form.Group>
-                  
-                  <Button variant="danger" type="submit" disabled={isSubmitting || review.rating === 0}>
-                    {isSubmitting ? (
-                      <>
-                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
-                        Enviando...
-                      </>
-                    ) : (
-                      "Publicar reseña"
-                    )}
-                  </Button>
-                </Form>
-              </Card.Body>
-            </Card>
-          </>
-        )}
-      </Container>
+                        <Tab eventKey="details" title="Detalles">
+                            <div className="mt-3">
+                            <h5 className="mb-3">Sinopsis</h5>
+                            <p>{movie.synopsis}</p>
+                            
+                            <h5 className="mb-3 mt-4">Reparto</h5>
+                            <Row>
+                                {movie.cast.map((person, i) => (
+                                <Col key={i} sm={6} md={4} className="mb-2">
+                                    <strong>{person.name}</strong> como {person.role}
+                                </Col>
+                                ))}
+                            </Row>
+                            </div>
+                        </Tab>
+                        <Tab eventKey="reviews" title={`Reseñas (${reviews.length})`}>
+                            <div className="mt-3">
+                            {reviews.length > 0 ? (
+                                <ListGroup variant="flush">
+                                {reviews.map((r) => (
+                                    <ListGroup.Item key={r.id} className="bg-dark text-white border-secondary">
+                                    <div className="d-flex justify-content-between mb-2">
+                                        <div>
+                                        <strong>{r.author}</strong> - {r.date}
+                                        </div>
+                                        <div className="text-warning">
+                                        {renderStars(r.rating)}
+                                        </div>
+                                    </div>
+                                    <p>{r.comment}</p>
+                                    
+                                    <div className="d-flex align-items-center mb-3">
+                                        <Button variant="outline-success" size="sm" className="me-2">
+                                        <FaThumbsUp className="me-1" /> {r.likes}
+                                        </Button>
+                                        <Button variant="outline-danger" size="sm" className="me-3">
+                                        <FaThumbsDown className="me-1" /> {r.dislikes}
+                                        </Button>
+                                    </div>
+                                    
+                                    <h6 className="mb-2">Comentarios:</h6>
+                                    {r.userComments.length > 0 ? (
+                                        <ListGroup variant="flush" className="mb-3">
+                                        {r.userComments.map((c) => (
+                                            <ListGroup.Item key={c.id} className="bg-secondary text-white mb-2 rounded">
+                                            <div className="d-flex justify-content-between">
+                                                <strong>{c.author}</strong>
+                                                <small className="text-light">{c.date}</small>
+                                            </div>
+                                            <p className="mb-0">{c.comment}</p>
+                                            </ListGroup.Item>
+                                        ))}
+                                        </ListGroup>
+                                    ) : (
+                                        <p className="text-muted">No hay comentarios aún</p>
+                                    )}
+                                    
+                                    <Form onSubmit={(e) => handleCommentSubmit(r.id, e)}>
+                                        <Form.Group className="mb-3">
+                                        <Form.Control
+                                            as="textarea"
+                                            rows={2}
+                                            placeholder="Escribe tu comentario..."
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
+                                            required
+                                        />
+                                        </Form.Group>
+                                        <Button variant="outline-light" size="sm" type="submit">
+                                        <FaEdit className="me-1" /> Comentar
+                                        </Button>
+                                    </Form>
+                                    </ListGroup.Item>
+                                ))}
+                                </ListGroup>
+                            ) : (
+                                <Alert variant="info">No hay reseñas aún. Sé el primero en opinar.</Alert>
+                            )}
+                            </div>
+                        </Tab>
+                        </Tabs>
+                    </Card.Body>
+                    </Card>
+                </Col>
+                </Row>
+                
+                {/* Formulario para nueva reseña */}
+                <Card className="bg-dark text-white border-light mb-4">
+                <Card.Body>
+                    <Card.Title as="h4">Escribe tu reseña</Card.Title>
+                    <Form onSubmit={handleReviewSubmit}>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Calificación:</Form.Label>
+                        <div className="d-flex mb-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <Button
+                            key={star}
+                            variant="outline-warning"
+                            type="button"
+                            className="me-2"
+                            onClick={() => handleRatingClick(star)}
+                            >
+                            {star <= review.rating ? <FaStar /> : <FaRegStar />}
+                            </Button>
+                        ))}
+                        </div>
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3">
+                        <Form.Label>Reseña:</Form.Label>
+                        <Form.Control
+                        as="textarea"
+                        rows={3}
+                        placeholder="Escribe tu opinión sobre la película..."
+                        value={review.comment}
+                        onChange={(e) => setReview({...review, comment: e.target.value})}
+                        required
+                        />
+                    </Form.Group>
+                    
+                    <Button variant="danger" type="submit" disabled={isSubmitting || review.rating === 0}>
+                        {isSubmitting ? (
+                        <>
+                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                            Enviando...
+                        </>
+                        ) : (
+                        "Publicar reseña"
+                        )}
+                    </Button>
+                    </Form>
+                </Card.Body>
+                </Card>
+            </>
+            )}
+        </Container>
+      </div>
     </div>
   );
 }
