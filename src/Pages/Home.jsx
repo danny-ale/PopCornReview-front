@@ -166,7 +166,6 @@ export default function Home() {
               <Carousel.Caption className="carousel-caption">
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
-                <Button variant="danger">Ver más</Button>
               </Carousel.Caption>
             </Carousel.Item>
           ))}
