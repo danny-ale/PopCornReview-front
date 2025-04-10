@@ -1,89 +1,411 @@
-.body-home{
-    background-color: black;
-    color: aliceblue;
+/* Estilos generales */
+.body-home {
+  background-color: #0D0D0D;
+  color: #FFFFFF;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.navbar{
-  background-color:#FFCC00;
+/* Navbar */
+.navbar {
+  background-color: #8B0000 !important;
+  border-bottom: 1px solid #fcfcfc;
+  padding: 0.5rem 0;
 }
 
-.navbar span{
-  font-weight: 800;
-  color:black;
-  font-size:medium;
-  padding-left: 5px;
+.logo-img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
 }
 
-.navbar img{
-  padding: 7px;
-  width: 70px;
-  height: 70px;
+.navbar-brand {
+  font-size: 1.5rem;
+  color: #ffffff !important;
 }
 
-.wsd{
-  width: 60%;
+/* Buscador */
+.search-container {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.searchInput{
-    width: 70%;
-    padding: 10px;
-    border: 2px solid rgba(59, 25, 0, 0.985);
-    border-radius: 20px;
-    background: rgb(214, 214, 214);
-    color: rgb(19, 19, 19);
-    font-size: 16px;
+.search-input {
+  background-color: #1A1A1A;
+  border: 1px solid #333;
+  color: #FFF;
+  border-radius: 25px 0 0 25px;
+  padding: 0.75rem 1.25rem;
 }
 
-.hero-section {
-    background: url('https://static.vecteezy.com/system/resources/previews/002/236/321/non_2x/movie-trendy-banner-vector.jpg') no-repeat center center/cover;
-    padding: 100px 20px;
+.search-input:focus {
+  background-color: #1A1A1A;
+  color: #FFF;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 0.25rem rgba(255, 204, 0, 0.25);
+}
+
+.search-button {
+  border-radius: 0 25px 25px 0;
+  padding: 0.75rem 1.25rem;
+}
+
+/* Carrusel */
+.hero-carousel {
+  margin-bottom: 3rem;
+}
+
+.carousel-image {
+  height: 60vh;
+  background-size: cover;
+  background-position: center;
+}
+
+.carousel-caption {
+  background: rgba(13, 13, 13, 0.85);
+  padding: 2rem;
+  border-radius: 8px;
+  right: 10%;
+  left: 10%;
+  bottom: 20%;
+}
+
+.carousel-caption h3 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #dc3545;
+}
+
+.carousel-caption p {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Secciones */
+.section-title {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+  color: #8b0000;
+}
+
+.section-title span {
+  display: inline-block;
+  padding: 0 1rem;
+  position: relative;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.section-title span::before,
+.section-title span::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 50px;
+  height: 2px;
+  background-color: #dc3545;
+}
+
+.section-title span::before {
+  right: 100%;
+}
+
+.section-title span::after {
+  left: 100%;
+}
+
+/* Estilos unificados para todas las cards */
+.movie-card,
+.review-card,
+.new-movie-card {
+  background-color: #252525;
+  border: 1px solid #333;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.movie-card:hover,
+.review-card:hover,
+.new-movie-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(139, 0, 0, 0.3);
+  border-color: #8B0000;
+}
+
+.movie-poster-container {
+  position: relative;
+  padding-top: 150%;
+  overflow: hidden;
+}
+
+.movie-poster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover .movie-poster,
+.review-card:hover .movie-poster,
+.new-movie-card:hover .movie-poster {
+  transform: scale(1.05);
+}
+
+/* Badges */
+.popularity-badge,
+.rating-badge,
+.classic-badge,
+.new-badge,
+.date-badge,
+.review-badge {
+  position: absolute;
+  z-index: 2;
+  color: white;
+  font-weight: bold;
+}
+
+.popularity-badge {
+  top: 10px;
+  left: 10px;
+}
+
+.rating-badge {
+  top: 10px;
+  right: 10px;
+  background-color: #8b0000;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.classic-badge {
+  bottom: 10px;
+  left: 10px;
+}
+
+.new-badge {
+  top: 10px;
+  left: 10px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  background-color: #dc3545;
+}
+
+.date-badge {
+  bottom: 10px;
+  right: 10px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  background-color: #1A1A1A;
+}
+
+.review-badge {
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  background-color: rgba(139, 0, 0, 0.8);
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+/* Contenido */
+.movie-title {
+  font-size: 1.1rem;
+  color: #FFF;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.movie-meta {
+  font-size: 0.85rem;
+  color: #AAA;
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Ratings */
+.likes-dislikes {
+  display: flex;
+  gap: 1rem;
+}
+
+.likes {
+  color: #4CAF50;
+}
+
+.dislikes {
+  color: #F44336;
+}
+
+.star-rating {
+  color: #FFD700;
+}
+
+.filled {
+  color: #FFD700;
+}
+
+.empty {
+  color: #444;
+}
+
+.rating-value {
+  color: #FFD700;
+  font-weight: bold;
+}
+
+/* Badges inferiores */
+.reactions-count,
+.premium-badge,
+.reviews-count {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.7rem;
+}
+
+/* Overlay */
+.movie-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.movie-card:hover .movie-overlay,
+.review-card:hover .movie-overlay {
+  opacity: 1;
+}
+
+/* Botones */
+.review-button {
+  border-width: 2px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border-color: #8B0000;
+  color: #8B0000;
+}
+
+.review-button:hover {
+  background-color: #8B0000;
+  color: white;
+}
+
+/* Animación para nuevas películas */
+.new-movie-card:not(:hover) .review-button {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(139, 0, 0, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(139, 0, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 0, 0, 0); }
+}
+
+/* Lista de recomendaciones */
+.recommendations-list {
+  background-color: #1A1A1A;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.recommendation-item {
+  background-color: #1A1A1A;
+  border-color: #333;
+  color: #FFF;
+  padding: 1rem 1.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.recommendation-item:hover {
+  background-color: #252525;
+}
+
+.recommendation-title {
+  font-weight: 500;
+}
+
+/* Footer */
+.footer {
+  border-top: 1px solid #333;
+  background-color: #1A1A1A;
+  padding: 2rem 0;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: #AAA;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1.25rem;
   }
-
+  
+  .search-container {
+    margin: 1rem 0;
+  }
+  
   .carousel-caption {
-    background: #0D0D0D;
-    padding: 15px;
-    border-radius: 8px;
-    width: 60%;
-    left: 10%;
-    transform: translateX(10%); 
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center; 
-    text-align: center; 
-}
-
-.carousel-caption .Banner {
-    background-color:#FFCC00;
-    width: 30px;
-    height: 130px;
-}
-
-.carousel-caption .TextBanner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; 
-    flex: 1; 
-    text-align: center; 
-    padding-left: 10px; 
-}
-
-.Titlees{
-    text-align: center;
-    color: #FFCC00;
-    font-weight: 800;
-    padding: 30px;
-}
-
-.SubTitles{
-  font-weight:200;
-  font-size:medium;
-}
-  
-footer {
-    position: relative;
-    bottom: 0;
-    width: 100%;
+    bottom: 10%;
+    padding: 1rem;
+    left: 5%;
+    right: 5%;
   }
   
+  .carousel-caption h3 {
+    font-size: 1.5rem;
+  }
+  
+  .carousel-caption p {
+    font-size: 1rem;
+  }
+  
+  .section-title span {
+    font-size: 1.5rem;
+  }
+  
+  .section-title span::before,
+  .section-title span::after {
+    width: 30px;
+  }
+
+  .movie-title {
+    font-size: 1rem;
+  }
+
+  .movie-meta {
+    font-size: 0.8rem;
+  }
+}

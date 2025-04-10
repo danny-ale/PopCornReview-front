@@ -7,6 +7,9 @@ import Perfil from './Pages/PerfilUsuario';
 import CrearCategoria from './Pages/CrearCategoria';
 import CrearPelicula from './Pages/CrearPelicula';
 import ListaReview from './Pages/ListaReviews';
+import Login from './Pages/Registro';
+import Result from './Pages/Result';
+import MovieDetail from './Pages/MovieDetail';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -21,6 +24,9 @@ function App() {
     <Route path='/CrearCategoria' element={<CrearCategoria/>}></Route>
     <Route path='/CrearPelicula' element={<CrearPelicula/>}></Route>
     <Route path='/ListaReview' element={<ListaReview/>}></Route>
+    <Route path='/login' element={<Login/>}></Route>
+    <Route path='/result' element={<Result/>}></Route>
+    <Route path='/movie' element={<MovieDetail/>}></Route>
     <Route path='/' element={<Home/>}></Route>
     </Routes>
     <ToastContainer />

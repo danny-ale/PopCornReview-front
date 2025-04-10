@@ -1,0 +1,74 @@
+/* Estilos para la página de detalles */
+.movie-poster {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Estilos para las pestañas */
+  .nav-tabs .nav-link {
+    color: #AAA;
+    border-color: #333;
+    background-color: #252525;
+  }
+  
+  .nav-tabs .nav-link.active {
+    color: #FFF;
+    background-color: #8B0000;
+    border-color: #333;
+    border-bottom-color: #8B0000;
+  }
+  
+  .nav-tabs .nav-link:hover {
+    border-color: #333;
+    color: #FFF;
+  }
+  
+  /* Estilos para las estrellas de rating */
+  .text-warning {
+    color: #FFD700 !important;
+  }
+  
+  .btn-outline-warning {
+    color: #FFD700;
+    border-color: #FFD700;
+  }
+  
+  .btn-outline-warning:hover {
+    background-color: rgba(255, 215, 0, 0.1);
+  }
+  
+  /* Estilos para los comentarios */
+  .comment-box {
+    background-color: #252525;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Estilos para el formulario de reseña */
+  .review-form {
+    background-color: #252525;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  
+  /* Estilos para los badges */
+  .badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+  }
+  
+  .bg-danger {
+    background-color: #8B0000 !important;
+  }
+  
+  .bg-success {
+    background-color: #4CAF50 !important;
+  }
+  
+  /* Estilos para el spinner */
+  .spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-width: 0.2em;
+  }

@@ -1,0 +1,65 @@
+/* Estilos para el paginador */
+.pagination {
+    margin-top: 2rem;
+  }
+  
+  .page-item.active .page-link {
+    background-color: #8B0000;
+    border-color: #8B0000;
+  }
+  
+  .page-link {
+    color: #8B0000;
+    background-color: #252525;
+    border: 1px solid #333;
+  }
+  
+  .page-link:hover {
+    color: #FFF;
+    background-color: #8B0000;
+    border-color: #8B0000;
+  }
+  
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #252525;
+    border-color: #333;
+  }
+  
+  /* Estilos para el dropdown de ordenación */
+  .dropdown-menu-dark {
+    background-color: #252525;
+    border: 1px solid #333;
+  }
+  
+  .dropdown-item {
+    color: #FFF;
+  }
+  
+  .dropdown-item:hover, .dropdown-item:focus {
+    background-color: #8B0000;
+    color: #FFF;
+  }
+  
+  .dropdown-item.active, .dropdown-item:active {
+    background-color: #8B0000;
+  }
+  
+  .dropdown-item-text {
+    color: #AAA;
+  }
+  
+  .dropdown-divider {
+    border-color: #333;
+  }
+  
+  /* Estilos para el badge de rating */
+  .rating-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+
