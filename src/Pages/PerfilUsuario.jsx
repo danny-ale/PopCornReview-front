@@ -239,13 +239,6 @@ const handleLogin = () => {
             >
               Ver Mis Listas
             </Button>
-            <Button 
-              variant="outline-danger" 
-              className="action-btn"
-              onClick={() => navigate('/favoritos')}
-            >
-              Mis Favoritos
-            </Button>
           </div>
         </div>
       </Container>
