@@ -144,20 +144,11 @@ export default function SearchResults() {
       setCurrentPage(1); // Resetear a la primera página al realizar nueva búsqueda
     }
   };
-
-  const navigateToLogin = () => {
-    navigate('/login');
-  };
-
   const navigateToReviewForm = (movieId) => {
     //navigate(`/movies/${movieId}/review/new`);
     navigate('/movie');
   };
-
-  const navigateToHome = () =>{
-    navigate('/');
-  }
-
+  
   const handleLogin = () => {
     setIsLoggedIn(true);
     navigate('/login');

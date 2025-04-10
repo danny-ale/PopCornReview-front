@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Badge, Tab, Tabs, ListGroup, Alert, Spinner } from 'react-bootstrap';
-import { FaStar, FaRegStar, FaThumbsUp, FaThumbsDown, FaArrowLeft, FaEdit } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaThumbsUp, FaThumbsDown, FaArrowLeft, FaEdit } from 'react-icons/fa';
 import '../css/MovieDetail.css';
 
 // Datos de ejemplo para la película
@@ -64,6 +64,7 @@ export default function MovieDetail() {
   // Simular carga de datos de la API
   const [movie, setMovie] = useState(movieData);
   const [loading, setLoading] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const handleBack = () => {
     navigate(-1);
@@ -127,6 +128,10 @@ export default function MovieDetail() {
     ));
   };
 
+  const toggleFavorite = () => {
+    setIsFavorite(!isFavorite);
+  };
+
   return (
     <div className="body-home">
        <div className="d-flex flex-row">
@@ -144,22 +149,50 @@ export default function MovieDetail() {
             ) : (
             <>
                 <Row className="mb-4">
-                <Col lg={4} className="mb-4 mb-lg-0">
-                    <Card className="bg-dark text-white border-light">
-                    <Card.Img variant="top" src={movie.image} alt={movie.title} />
-                    <Card.Body className="text-center">
+                <Col lg={4} className="mb-4 mb-lg-0 position-relative">
+                    <Card className="bg-dark text-white border-light h-100">
+                      <Button 
+                        variant="link" 
+                        className={`position-absolute top-0 end-0 p-2 favorite-btn ${isFavorite ? 'text-danger' : 'text-white'}`}
+                        onClick={toggleFavorite}
+                        aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+                      >
+                        {isFavorite ? <FaHeart size={24} /> : <FaRegHeart size={24} />}
+                      </Button>
+                      
+                      <Card.Img variant="top" src={movie.image} alt={movie.title} />
+                      <Card.Body className="text-center">
                         <Badge bg="danger" className="fs-5 mb-2">
-                        {movie.rating.toFixed(1)}/5.0
+                          {movie.rating.toFixed(1)}/5.0
                         </Badge>
                         <div className="mb-2 text-warning">
-                        {renderStars(Math.round(movie.rating))}
+                          {[...Array(5)].map((_, i) => (
+                            i < Math.round(movie.rating) ? <FaStar key={i} /> : <FaRegStar key={i} />
+                          ))}
                         </div>
-                        <Badge bg="success" className="fs-6">
-                        {movie.approval}% de aprobación
+                        <Badge bg="success" className="fs-6 mb-3">
+                          {movie.approval}% de aprobación
                         </Badge>
-                    </Card.Body>
+                        
+                        {/* Botón adicional con texto (opcional) */}
+                        <Button 
+                          variant={isFavorite ? "outline-danger" : "outline-light"} 
+                          onClick={toggleFavorite}
+                          className="mt-2 d-flex align-items-center justify-content-center gap-2 w-100"
+                        >
+                          {isFavorite ? (
+                            <>
+                              <FaHeart /> En favoritos
+                            </>
+                          ) : (
+                            <>
+                              <FaRegHeart /> Agregar a favoritos
+                            </>
+                          )}
+                        </Button>
+                      </Card.Body>
                     </Card>
-                </Col>
+                  </Col>
                 <Col lg={8}>
                     <Card className="bg-dark text-white border-light h-100">
                     <Card.Body>

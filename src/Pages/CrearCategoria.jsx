@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import '../css/CrearCategoria.css';
-
+import { Button } from 'react-bootstrap';
+import { FaArrowLeft } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 export default function CrearCategoria() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         nombre: '',
         descripcion: ''
@@ -45,34 +48,45 @@ export default function CrearCategoria() {
         }
     };
 
+      const handleBack = () => {
+        navigate(-1);
+      };
+
+
     return (
-        <div className="form-container">
-            <h1>Crear categoría</h1>
-            
-            <form onSubmit={handleSubmit} className="form-fields">
-                <label htmlFor="nombre">Nombre</label>
-                <input 
-                    type="text" 
-                    id="nombre" 
-                    name="nombre" 
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    className={errors.nombre ? 'error' : ''}
-                />
-                {errors.nombre && <p className="error-message">{errors.nombre}</p>}
-                
-                <label htmlFor="descripcion">Descripción</label>
-                <textarea 
-                    id="descripcion" 
-                    name="descripcion" 
-                    value={formData.descripcion}
-                    onChange={handleChange}
-                    className={errors.descripcion ? 'error' : ''}
-                />
-                {errors.descripcion && <p className="error-message">{errors.descripcion}</p>}
-                
-                <button type="submit" className="submit-button">Crear categoría</button>
-            </form>
+        <div className="d-flex flex-row">
+            <div className='py-5 px-4'>
+            <Button variant="light" onClick={handleBack} className="w-2">
+                <FaArrowLeft className="me-2" /> Volver 
+            </Button>
+            </div>
+            <div className="form-container">
+                <h1>Crear categoría</h1>
+                <form onSubmit={handleSubmit} className="form-fields">
+                    <label htmlFor="nombre">Nombre</label>
+                    <input 
+                        type="text" 
+                        id="nombre" 
+                        name="nombre" 
+                        value={formData.nombre}
+                        onChange={handleChange}
+                        className={errors.nombre ? 'error' : ''}
+                    />
+                    {errors.nombre && <p className="error-message">{errors.nombre}</p>}
+                    
+                    <label htmlFor="descripcion">Descripción</label>
+                    <textarea 
+                        id="descripcion" 
+                        name="descripcion" 
+                        value={formData.descripcion}
+                        onChange={handleChange}
+                        className={errors.descripcion ? 'error' : ''}
+                    />
+                    {errors.descripcion && <p className="error-message">{errors.descripcion}</p>}
+                    
+                    <button type="submit" className="submit-button">Crear categoría</button>
+                </form>
+            </div>
         </div>
     );
 };
