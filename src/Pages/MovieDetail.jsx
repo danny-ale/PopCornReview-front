@@ -4,7 +4,6 @@ import { Container, Row, Col, Card, Button, Form, Badge, Tab, Tabs, ListGroup, A
 import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaThumbsUp, FaThumbsDown, FaArrowLeft, FaEdit } from 'react-icons/fa';
 import '../css/MovieDetail.css';
 
-// Datos de ejemplo para la película
 const movieData = {
   id: 1,
   title: "Oppenheimer",
@@ -53,15 +52,12 @@ const movieData = {
 };
 
 export default function MovieDetail() {
-  const { id } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
-  const [review, setReview] = useState({ rating: 0, comment: '' });
+  const [review, setReview] = useState({ rating: 0, comment: '', liked: null });
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reviews, setReviews] = useState(movieData.reviews);
-
-  // Simular carga de datos de la API
   const [movie, setMovie] = useState(movieData);
   const [loading, setLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -78,7 +74,6 @@ export default function MovieDetail() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simular envío a API
     setTimeout(() => {
       const newReview = {
         id: reviews.length + 1,
@@ -140,8 +135,8 @@ export default function MovieDetail() {
             <FaArrowLeft className="me-2" /> Volver 
             </Button>
          </div>
-        <Container className="py-4 d-flex flex-column">
 
+        <Container className="py-4 d-flex flex-column">
             {loading ? (
             <div className="text-center py-5">
                 <Spinner animation="border" variant="light" />
@@ -174,7 +169,6 @@ export default function MovieDetail() {
                           {movie.approval}% de aprobación
                         </Badge>
                         
-                        {/* Botón adicional con texto (opcional) */}
                         <Button 
                           variant={isFavorite ? "outline-danger" : "outline-light"} 
                           onClick={toggleFavorite}
@@ -301,50 +295,73 @@ export default function MovieDetail() {
                 
                 {/* Formulario para nueva reseña */}
                 <Card className="bg-dark text-white border-light mb-4">
-                <Card.Body>
+                  <Card.Body>
                     <Card.Title as="h4">Escribe tu reseña</Card.Title>
                     <Form onSubmit={handleReviewSubmit}>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Calificación:</Form.Label>
-                        <div className="d-flex mb-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                      <div className='d-flex flex-row justify-content-between'>
+                        <Form.Group className="mb-3  d-flex flex-row gap-4 ">
+                          <Form.Label>Calificación:</Form.Label>
+                          <div className="d-flex mb-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Button
+                                key={star}
+                                variant="outline-warning"
+                                type="button"
+                                className="me-2"
+                                onClick={() => handleRatingClick(star)}
+                              >
+                                {star <= review.rating ? <FaStar /> : <FaRegStar />}
+                              </Button>
+                            ))}
+                          </div>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3 d-flex flex-row gap-4 ">
+                          <Form.Label>¿Recomiendas esta película?</Form.Label>
+                          <div className="d-flex mb-2">
                             <Button
-                            key={star}
-                            variant="outline-warning"
-                            type="button"
-                            className="me-2"
-                            onClick={() => handleRatingClick(star)}
+                              variant={review.liked ? "success" : "outline-success"}
+                              className="me-2"
+                              onClick={() => setReview({...review, liked: true})}
+                              type="button"
                             >
-                            {star <= review.rating ? <FaStar /> : <FaRegStar />}
+                              <FaThumbsUp /> Like
                             </Button>
-                        ))}
-                        </div>
-                    </Form.Group>
-                    
-                    <Form.Group className="mb-3">
+                            <Button
+                              variant={review.liked === false ? "danger" : "outline-danger"}
+                              onClick={() => setReview({...review, liked: false})}
+                              type="button"
+                            >
+                              <FaThumbsDown /> Dislike
+                            </Button>
+                          </div>
+                        </Form.Group>
+                      </div>
+                      
+                      <Form.Group className="mb-3">
                         <Form.Label>Reseña:</Form.Label>
                         <Form.Control
-                        as="textarea"
-                        rows={3}
-                        placeholder="Escribe tu opinión sobre la película..."
-                        value={review.comment}
-                        onChange={(e) => setReview({...review, comment: e.target.value})}
-                        required
+                          as="textarea"
+                          rows={3}
+                          placeholder="Escribe tu opinión sobre la película..."
+                          value={review.comment}
+                          onChange={(e) => setReview({...review, comment: e.target.value})}
+                          required
                         />
-                    </Form.Group>
-                    
-                    <Button variant="danger" type="submit" disabled={isSubmitting || review.rating === 0}>
+                      </Form.Group>
+                      
+                      <Button variant="danger" type="submit" disabled={isSubmitting || review.rating === 0}>
                         {isSubmitting ? (
-                        <>
+                          <>
                             <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
                             Enviando...
-                        </>
+                          </>
                         ) : (
-                        "Publicar reseña"
+                          "Publicar reseña"
                         )}
-                    </Button>
+                      </Button>
                     </Form>
-                </Card.Body>
+                  </Card.Body>
                 </Card>
             </>
             )}

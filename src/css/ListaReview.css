@@ -80,7 +80,7 @@
     font-size: 0.9rem;
 }
 
-/* Favorites Section */
+
 .movies-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -185,7 +185,7 @@
     border-radius: 10px;
 }
 
-/* Reviews Section */
+
 .review-card {
     background-color: var(--light-bg);
     border-radius: var(--border-radius);
@@ -433,7 +433,7 @@
     padding-top: 10px;
 }
 
-/* Añadido a la sección de favoritos */
+
 .added-date {
     font-size: 0.8rem;
     color: var(--text-secondary);
@@ -451,7 +451,7 @@
     border: 1px solid #444 !important;
 }
 
-/* Estilos para edición de reseñas */
+
 .edit-review-textarea {
     width: 100%;
     padding: 10px;
@@ -478,7 +478,7 @@
     background-color: #616161 !important;
 }
 
-/* Estilos para badges de visibilidad */
+
 .visibility-badge {
     padding: 3px 10px;
     border-radius: 12px;
@@ -498,7 +498,7 @@
     border: 1px solid #9e9e9e;
 }
 
-/* Mejoras para responsive */
+
 @media (max-width: 768px) {
     .category-actions {
         flex-direction: column;
@@ -510,7 +510,7 @@
     }
 }
 
-/* Responsive Design adicional */
+
 @media (max-width: 992px) {
     .table-row {
         grid-template-columns: 2fr 1fr 1fr;
@@ -547,7 +547,7 @@
     }
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
     .movies-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

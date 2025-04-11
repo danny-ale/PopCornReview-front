@@ -5,10 +5,10 @@ import { Button } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-
-
 export default function CrearPelicula() {
     const navigate = useNavigate();
+    const [previewImage, setPreviewImage] = useState('pelicula.jpg');
+
     const [formData, setFormData] = useState({
         titulo: '',
         anio: '',
@@ -17,8 +17,6 @@ export default function CrearPelicula() {
         sinopsis: '',
         cartel: null
     });
-
-    const [previewImage, setPreviewImage] = useState('pelicula.jpg');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -48,14 +46,14 @@ export default function CrearPelicula() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log('Datos del formulario:', formData);
-        
+        //Aqui van los datos que se van a enviar al servidor
     };
 
     const handleBack = () => {
         navigate(-1);
-      };
+    };
 
-    return (
+return (
         <div className="movie-form">
             <h1>Registrar Película</h1>
             <div className="d-flex flex-row">

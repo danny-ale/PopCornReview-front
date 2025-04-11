@@ -40,7 +40,7 @@ export default function PerfilUsuario() {
   const handleSaveChanges = () => {
     setUserData({...editData});
     setShowEditModal(false);
-    // Aquí iría la lógica para actualizar en la base de datos
+    // Aqui van los datos para la API
   };
 
   const handleImageChange = (e) => {
@@ -60,16 +60,15 @@ export default function PerfilUsuario() {
   };
 
 
-const handleLogin = () => {
+  const handleLogin = () => {
       setIsLoggedIn(true);
       navigate('/login');
-    };
+  };
   
 
-  return (
+return (
     <div className="user-profile">
-    
-    <nav className='navbar navbar-expand-lg navbar-dark bg-dark py-3'>
+      <nav className='navbar navbar-expand-lg navbar-dark bg-dark py-3'>
             <Container>
                 <div className='d-flex align-items-center'>
                 <img src={Logo2} alt='Logo' className='logo-img me-2' />
@@ -151,7 +150,7 @@ const handleLogin = () => {
                 </Button>
                 )}
             </Container>
-    </nav>
+      </nav>
 
       <Container className="profile-container">
         <div className="user-profile-card">
@@ -206,16 +205,16 @@ const handleLogin = () => {
             
             <div className="detail-item">
               <span className="detail-label"><FaLock /> Contraseña:</span>
-              <div className="password-field">
-                {showPassword ? userData.Contraseña : '••••••••'}
-                <Button 
-                  variant="link" 
-                  className="toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </Button>
-              </div>
+                <div className="password-field">
+                  {showPassword ? userData.Contraseña : '••••••••'}
+                  <Button 
+                    variant="link" 
+                    className="toggle-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </Button>
+                </div>
             </div>
             
             <div className="detail-item bio-item">
@@ -243,7 +242,7 @@ const handleLogin = () => {
         </div>
       </Container>
 
-      {/* Modal de Edición */}
+
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered className="dark-modal">
         <Modal.Header closeButton>
           <Modal.Title>Editar Perfil</Modal.Title>

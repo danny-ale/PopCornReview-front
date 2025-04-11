@@ -1,11 +1,9 @@
-/* Estilos generales */
 .body-home {
   background-color: #0D0D0D;
   color: #FFFFFF;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Navbar */
 .navbar {
   background-color: #8B0000 !important;
   border-bottom: 1px solid #fcfcfc;
@@ -23,11 +21,9 @@
   color: #ffffff !important;
 }
 
-
-/* Dropdown Navbar */
 .navbar-dark .navbar-nav .dropdown-menu {
-  background-color: #252525; /* Fondo oscuro */
-  border: 1px solid #444; /* Borde sutil */
+  background-color: #252525; 
+  border: 1px solid #444;
 }
 
 .dropdown-menu-dark {
@@ -36,27 +32,25 @@
 }
 
 .dropdown-menu-dark .dropdown-item {
-  color: #ffffff; /* Texto blanco */
+  color: #ffffff; 
   transition: all 0.3s ease;
 }
 
 .dropdown-menu-dark .dropdown-item:hover,
 .dropdown-menu-dark .dropdown-item:focus {
-  background-color: #8B0000; /* Rojo oscuro al hover */
+  background-color: #8B0000; 
   color: white;
 }
 
 .dropdown-menu-dark .dropdown-divider {
-  border-color: #444; /* Divisores oscuros */
+  border-color: #444;
 }
 
-/* Estilo para el submenú */
 .dropdown-submenu .dropdown-menu {
-  background-color: #1a1a1a; /* Un tono más oscuro para submenús */
+  background-color: #1a1a1a;
   margin-left: 0;
 }
 
-/* Estilo para el toggle del dropdown */
 .navbar-dark .navbar-nav .nav-link {
   color: rgba(255, 255, 255, 0.8);
 }
@@ -65,8 +59,6 @@
   color: #ffffff;
 }
 
-
-/* Buscador */
 .search-container {
   max-width: 600px;
   margin: 0 auto;
@@ -92,7 +84,6 @@
   padding: 0.75rem 1.25rem;
 }
 
-/* Carrusel */
 .hero-carousel {
   margin-bottom: 3rem;
 }
@@ -123,7 +114,6 @@
   margin-bottom: 1.5rem;
 }
 
-/* Secciones */
 .section-title {
   text-align: center;
   margin-bottom: 3rem;
@@ -157,7 +147,6 @@
   left: 100%;
 }
 
-/* Estilos unificados para todas las cards */
 .movie-card,
 .review-card,
 .new-movie-card {
@@ -198,7 +187,6 @@
   transform: scale(1.05);
 }
 
-/* Badges */
 .popularity-badge,
 .rating-badge,
 .classic-badge,
@@ -258,7 +246,6 @@
   font-size: 0.8rem;
 }
 
-/* Contenido */
 .movie-title {
   font-size: 1.1rem;
   color: #FFF;
@@ -278,7 +265,6 @@
   flex-wrap: wrap;
 }
 
-/* Ratings */
 .likes-dislikes {
   display: flex;
   gap: 1rem;
@@ -309,7 +295,6 @@
   font-weight: bold;
 }
 
-/* Badges inferiores */
 .reactions-count,
 .premium-badge,
 .reviews-count {
@@ -317,7 +302,6 @@
   padding: 0.4rem 0.7rem;
 }
 
-/* Overlay */
 .movie-overlay {
   position: absolute;
   top: 0;
@@ -338,7 +322,6 @@
   opacity: 1;
 }
 
-/* Botones */
 .review-button {
   border-width: 2px;
   font-weight: 600;
@@ -352,7 +335,6 @@
   color: white;
 }
 
-/* Animación para nuevas películas */
 .new-movie-card:not(:hover) .review-button {
   animation: pulse 2s infinite;
 }
@@ -363,7 +345,6 @@
   100% { box-shadow: 0 0 0 0 rgba(139, 0, 0, 0); }
 }
 
-/* Lista de recomendaciones */
 .recommendations-list {
   background-color: #1A1A1A;
   border-radius: 10px;
@@ -386,7 +367,6 @@
   font-weight: 500;
 }
 
-/* Footer */
 .footer {
   border-top: 1px solid #333;
   background-color: #1A1A1A;
@@ -410,7 +390,6 @@
   color: #dc3545;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .navbar-brand {
     font-size: 1.25rem;

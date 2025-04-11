@@ -6,12 +6,12 @@ import { useNavigate } from 'react-router-dom';
 
 export default function CrearCategoria() {
     const navigate = useNavigate();
+    const [errors, setErrors] = useState({});
+
     const [formData, setFormData] = useState({
         nombre: '',
         descripcion: ''
     });
-
-    const [errors, setErrors] = useState({});
 
     const validateForm = () => {
         const newErrors = {};
@@ -43,27 +43,26 @@ export default function CrearCategoria() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            console.log('Formulario válido:', formData);
-            // Aquí iría la lógica para enviar los datos al servidor
+            // Aqui va el envio de datos si todo esta bien
         }
     };
 
-      const handleBack = () => {
+    const handleBack = () => {
         navigate(-1);
-      };
+    };
 
 
-    return (
-        <div className="d-flex flex-row">
-            <div className='py-5 px-4'>
+return (
+    <div className="d-flex flex-row">
+        <div className='py-5 px-4'>
             <Button variant="light" onClick={handleBack} className="w-2">
                 <FaArrowLeft className="me-2" /> Volver 
             </Button>
-            </div>
-            <div className="form-container">
-                <h1>Crear categoría</h1>
-                <form onSubmit={handleSubmit} className="form-fields">
-                    <label htmlFor="nombre">Nombre</label>
+        </div>
+        <div className="form-container">
+            <h1>Crear categoría</h1>
+            <form onSubmit={handleSubmit} className="form-fields">
+                <label htmlFor="nombre">Nombre</label>
                     <input 
                         type="text" 
                         id="nombre" 
@@ -74,7 +73,7 @@ export default function CrearCategoria() {
                     />
                     {errors.nombre && <p className="error-message">{errors.nombre}</p>}
                     
-                    <label htmlFor="descripcion">Descripción</label>
+                <label htmlFor="descripcion">Descripción</label>
                     <textarea 
                         id="descripcion" 
                         name="descripcion" 
@@ -84,9 +83,9 @@ export default function CrearCategoria() {
                     />
                     {errors.descripcion && <p className="error-message">{errors.descripcion}</p>}
                     
-                    <button type="submit" className="submit-button">Crear categoría</button>
-                </form>
-            </div>
+                <button type="submit" className="submit-button">Crear categoría</button>
+            </form>
         </div>
+    </div>
     );
 };

@@ -6,7 +6,11 @@ import { FaStar, FaRegStar, FaStarHalfAlt, FaHeart, FaArrowLeft, FaEdit, FaTrash
 import defaultMovieImg from '../Images/pelicula.jpg';
 import Swal from 'sweetalert2';
 
-export default function ListaReview({ username = "Usuario1" }) {
+export default function ListaReview() {
+    const navigate = useNavigate();
+    const [editingReview, setEditingReview] = useState(null);
+    const [editedReviewText, setEditedReviewText] = useState('');
+
     const [lists, setLists] = useState({
         favorites: [
             {
@@ -120,10 +124,6 @@ export default function ListaReview({ username = "Usuario1" }) {
             }
         ]
     });
-
-    const navigate = useNavigate();
-    const [editingReview, setEditingReview] = useState(null);
-    const [editedReviewText, setEditedReviewText] = useState('');
 
     const renderStars = (rating) => {
         const stars = [];
@@ -256,31 +256,34 @@ export default function ListaReview({ username = "Usuario1" }) {
 
     const handleBack = () => {
         navigate(-1);
-      };
+    };
 
-    return (
-        <div className="d-flex flex-row">
-            <div className='py-5 px-4'>
+return (
+    <div className="d-flex flex-row">
+        <div className='py-5 px-4'>
             <Button variant="light" onClick={handleBack} className="w-2">
                 <FaArrowLeft className="me-2" /> Volver 
             </Button>
-            </div>
-            <div className="user-reviews-page">
-                <header className="user-header">
-                    <h1>Perfil de {username}</h1>
-                    <div className="user-stats">
+        </div>
+        <div className="user-reviews-page">
+            <header className="user-header">
+                <h1>Perfil de UsuarioEjemplo</h1>
+                <div className="user-stats">
                         <span><FaList /> {lists.addedMovies.length} Agregadas</span>
                         <span><FaEdit /> {lists.reviews.length} Reseñas</span>
                         <span><FaHeart /> {lists.favorites.length} Favoritos</span>
                         <span><FaFolder /> {lists.customCategories.length} Categorías</span>
-                    </div>
-                </header>     
+                </div>
+            </header>     
                 <div className="lists-container">
-                    {/* Sección de Películas Agregadas */}
                     <section className="added-movies-section">
                         <div className="section-header">
                             <h2><FaPlus className="section-icon" /> Películas Agregadas</h2>
-                            <span className="count-badge">{lists.addedMovies.length} películas</span>
+                            <div>
+                                <button className="add-category-btn" onClick={() => navigate('/CrearPelicula')}>
+                                   <FaPlus /> Agregar Pelicula
+                                </button>
+                            </div>
                         </div>
                         
                         <div className="movies-table">
@@ -507,7 +510,7 @@ export default function ListaReview({ username = "Usuario1" }) {
                         ))}
                     </section>
                 </div>
-            </div>
         </div>
-    );
+    </div>
+);
 };

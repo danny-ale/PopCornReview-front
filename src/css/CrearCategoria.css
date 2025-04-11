@@ -22,7 +22,7 @@ body {
     align-items: center;
 }
 
-/* Título grande al principio */
+
 .form-container h1 {
     font-size: 36px;
     margin-bottom: 30px;
@@ -31,7 +31,7 @@ body {
     width: 100%;
 }
 
-/* Contenedor del formulario */
+
 .form-fields {
     display: flex;
     flex-direction: column;

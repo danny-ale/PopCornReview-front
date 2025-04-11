@@ -1,4 +1,3 @@
-/* Estilos para el menú desplegable */
 .dropdown-menu-dark {
   background-color: #252525;
   border: 1px solid #444;
@@ -18,7 +17,7 @@
   border-color: #444;
 }
 
-/* Submenú desplegable */
+
 .dropdown-submenu {
   position: relative;
 }
@@ -29,7 +28,7 @@
   margin-top: -1px;
 }
 
-/* Efecto hover para el navbar brand */
+
 .cursor-pointer {
   cursor: pointer;
 }
@@ -38,7 +37,7 @@
   opacity: 0.8;
 }
 
-/* Estilos para el paginador */
+
 .pagination {
     margin-top: 2rem;
   }
@@ -66,7 +65,7 @@
     border-color: #333;
   }
   
-  /* Estilos para el dropdown de ordenación */
+
   .dropdown-menu-dark {
     background-color: #252525;
     border: 1px solid #333;
@@ -93,7 +92,7 @@
     border-color: #333;
   }
   
-  /* Estilos para el badge de rating */
+
   .rating-badge {
     position: absolute;
     top: 10px;

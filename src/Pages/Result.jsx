@@ -95,18 +95,17 @@ export default function SearchResults() {
   const [itemsPerPage] = useState(4);
   const [sortOption, setSortOption] = useState('relevance');
   const [sortDirection, setSortDirection] = useState('desc');
-    const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-
   const params = new URLSearchParams(location.search);
   const query = params.get("query")?.toLowerCase() || "";
 
-  // Filtrar resultados
+  
   let filteredResults = mockResults.filter(movie =>
     movie.title.toLowerCase().includes(query)
   );
 
-  // Ordenar resultados
+
   filteredResults = filteredResults.sort((a, b) => {
     switch (sortOption) {
       case 'title':
@@ -130,7 +129,7 @@ export default function SearchResults() {
     }
   });
 
-  // Paginación
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredResults.slice(indexOfFirstItem, indexOfLastItem);
@@ -141,9 +140,10 @@ export default function SearchResults() {
     const searchInput = e.target.elements.search.value;
     if (searchInput.trim()) {
       navigate('/result')
-      setCurrentPage(1); // Resetear a la primera página al realizar nueva búsqueda
+      setCurrentPage(1); 
     }
   };
+
   const navigateToReviewForm = (movieId) => {
     //navigate(`/movies/${movieId}/review/new`);
     navigate('/movie');
@@ -201,7 +201,6 @@ export default function SearchResults() {
 
   return (
     <div className="body-home">
-      {/* Navbar */}
       <nav className='navbar navbar-expand-lg navbar-dark bg-dark py-3'>
       <Container>
         <div className='d-flex align-items-center'>
@@ -284,9 +283,8 @@ export default function SearchResults() {
           </Button>
         )}
       </Container>
-    </nav>
+      </nav>
 
-      {/* Resultados de búsqueda */}
       <Container className="my-5 d-flex flex-column">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="section-title mb-0">
