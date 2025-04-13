@@ -72,96 +72,174 @@ function Registro() {
 
 
       try {
-        const response = await axios.post('http://localhost:3001/create', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+        const response = await axios.post('http://localhost:3001/popCornReview/register', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
         });
       
-          if (response.data.msg === "Registrado"){
-            console.log('Success:', "Registro exitoso");
-            setName("");
-            setEmail("");
-            setPass("");
-            setBirthday("");
-            setImage(null);
-            document.getElementById("terms").checked = false;
-           
-            navg("/Home");
-          } else if(response.data.msg === "Error"){
-            console.error('Error:', "Error al registrar");
-          }
-          
+        if (response.data.success) {
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('userData', JSON.stringify({
+              userId: response.data.userId,
+              name: name,
+              email: email
+          }));
 
+          toast.success('Registro y autenticación exitosos', {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: false,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+              transition: Bounce,
+          });
+
+          setName("");
+          setEmail("");
+          setPass("");
+          setBirthday("");
+          setImage(null);
+          document.getElementById("terms").checked = false;
+
+          navg("/Home");
+      }
       } catch (error) {
-        console.error('Error:', error);
+          console.error('Error:', error);
+          if (error.response) {
+              const { data } = error.response;
+              if (data.codigoError === 'EMAIL_ALREADY_EXISTS') {
+                  toast.error(data.msg, {
+                      position: "top-right",
+                      autoClose: 5000,
+                      hideProgressBar: false,
+                      closeOnClick: false,
+                      pauseOnHover: true,
+                      draggable: true,
+                      progress: undefined,
+                      theme: "dark",
+                      transition: Bounce,
+                  });
+              } else {
+                  toast.error('Error en el registro. Por favor intenta nuevamente.', {
+                      position: "top-right",
+                      autoClose: 5000,
+                      hideProgressBar: false,
+                      closeOnClick: false,
+                      pauseOnHover: true,
+                      draggable: true,
+                      progress: undefined,
+                      theme: "dark",
+                      transition: Bounce,
+                  });
+              }
+          }
       }
     }
 
-    const Login = async (e) =>{
+    const Login = async (e) => {
       e.preventDefault();
-
+      
+      if (!email || !pass) {
+        toast.warn('Por favor ingresa ambos campos: correo y contraseña', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
+        return;
+      }   
+      
       const loginData = {
         correo: email,
         contra: pass
-    };
-  
+      };
 
       try {
-        const response = await axios.post('http://localhost:3001/login', loginData, {
-          headers: {
-              'Content-Type': 'application/json' 
-          }
-      });
-  
-          if (response.data.msg === "Encontrado"){
-            setEmail('');
-            setPass('');
-            toast.success('Inicio de Sesiòn Exitoso', {
-              position: "top-right",
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: false,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "dark",
-              transition: Bounce,
-              });
-            navg("/Home");
-          }if(response.data.msg === "Contraseña incorrecta"){
-            toast.warn('Contraseña incorrecta', {
-              position: "top-right",
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: false,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "dark",
-              transition: Bounce,
-              });
-          }
-           if(response.data.msg === "No encontrado"){
-            toast.error("Usuario no encontrado", {
-              position: "top-right",
-              autoClose: 5000,
-              hideProgressBar: false,
-              newestOnTop: false,
-              closeOnClick: false,
-              rtl: false,
-              pauseOnFocusLoss: true,
-              draggable: true,
-              pauseOnHover: true,
-              theme: "dark",
-              transition: Bounce
-            });
-          }
-          
+          const response = await axios.post('http://localhost:3001/popCornReview/login', loginData, {
+              headers: {
+                  'Content-Type': 'application/json'
+              }
+          });
 
+          if (response.data.success) {
+              localStorage.setItem('token', response.data.token);
+              localStorage.setItem('userData', JSON.stringify({
+                  userId: response.data.userId,
+                  name: response.data.nombre,
+                  email: email
+              }));
+
+              toast.success('Inicio de sesión exitoso', {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: false,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "dark",
+                  transition: Bounce,
+              });
+
+              setEmail('');
+              setPass('');
+              navg("/Home");
+          }
       } catch (error) {
-        console.error('Error:', error);
+          console.error('Error:', error);
+          if (error.response) {
+              const { data } = error.response;
+              if (data.codigoError === "USER_NOT_FOUND") {
+                  toast.error("Usuario no encontrado", {
+                      position: "top-right",
+                      autoClose: 5000,
+                      hideProgressBar: false,
+                      newestOnTop: false,
+                      closeOnClick: false,
+                      rtl: false,
+                      pauseOnFocusLoss: true,
+                      draggable: true,
+                      pauseOnHover: true,
+                      theme: "dark",
+                      transition: Bounce
+                  });
+              } else if (data.codigoError === "INVALID_PASSWORD") {
+                  toast.warn('Contraseña incorrecta', {
+                      position: "top-right",
+                      autoClose: 5000,
+                      hideProgressBar: false,
+                      closeOnClick: false,
+                      pauseOnHover: true,
+                      draggable: true,
+                      progress: undefined,
+                      theme: "dark",
+                      transition: Bounce,
+                  });
+              }
+          } else {
+              toast.error('Error en el servidor', {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  newestOnTop: false,
+                  closeOnClick: false,
+                  rtl: false,
+                  pauseOnFocusLoss: true,
+                  draggable: true,
+                  pauseOnHover: true,
+                  theme: "dark",
+                  transition: Bounce
+              });
+          }
       }
     }
-
 
     function SwitchContent(){
       const content= document.getElementById('content');
@@ -176,9 +254,6 @@ function Registro() {
         content.classList.remove("active")
       });
     }
-
-
-
 
     //AQUI ESTA EL DISEÑO
     return ( 
