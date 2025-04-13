@@ -2,9 +2,14 @@ import React, { useState } from 'react';
 import '../css/ListaReview.css';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
-import { FaStar, FaRegStar, FaStarHalfAlt, FaHeart, FaArrowLeft, FaEdit, FaTrash, FaPlus, FaFolder, FaList } from 'react-icons/fa';
-import defaultMovieImg from '../Images/pelicula.jpg';
+import { FaStar, FaRegStar, FaStarHalfAlt, FaHeart, FaArrowLeft, FaEdit, FaFolder, FaList } from 'react-icons/fa';
 import Swal from 'sweetalert2';
+import AddedMoviesSection from '../Components/List_AddMovies';
+import CustomCategoriesSection from '../Components/List_AddCategories';
+import FavoritesSection from '../Components/List_AddFavoritesMovies';
+import ReviewsSection from '../Components/List_ReviewMovies';
+
+
 
 export default function ListaReview() {
     const navigate = useNavigate();
@@ -276,239 +281,38 @@ return (
                 </div>
             </header>     
                 <div className="lists-container">
-                    <section className="added-movies-section">
-                        <div className="section-header">
-                            <h2><FaPlus className="section-icon" /> Películas Agregadas</h2>
-                            <div>
-                                <button className="add-category-btn" onClick={() => navigate('/CrearPelicula')}>
-                                   <FaPlus /> Agregar Pelicula
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div className="movies-table">
-                            <div className="table-header">
-                                <div className="table-row">
-                                    <div className="table-cell">Película</div>
-                                    <div className="table-cell">Año</div>
-                                    <div className="table-cell">Director</div>
-                                    <div className="table-cell">Fecha de agregado</div>
-                                    <div className="table-cell">Acciones</div>
-                                </div>
-                            </div>
-                            <div className="table-body">
-                                {lists.addedMovies.map(movie => (
-                                    <div key={movie.id} className="table-row">
-                                        <div className="table-cell movie-title-cell">
-                                            <img 
-                                                src={movie.poster} 
-                                                alt={movie.title}
-                                                className="table-movie-poster"
-                                                onError={(e) => {
-                                                    e.target.src = defaultMovieImg;
-                                                }}
-                                            />
-                                            <span>{movie.title}</span>
-                                        </div>
-                                        <div className="table-cell">{movie.year}</div>
-                                        <div className="table-cell">{movie.director}</div>
-                                        <div className="table-cell">{formatDate(movie.addedDate)}</div>
-                                        <div className="table-cell actions-cell d-flex flex-column">
-                                            <button 
-                                                className="action-btn edit-btn"
-                                                onClick={() => handleEditMovie(movie)}
-                                            >
-                                                <FaEdit /> Editar
-                                            </button>
-                                            <button 
-                                                className="action-btn delete-btn"
-                                                onClick={() => handleDelete('addedMovies', movie.id)}
-                                            >
-                                                <FaTrash /> Eliminar
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
+                    <AddedMoviesSection 
+                        movies={lists.addedMovies}
+                        onEditMovie={handleEditMovie}
+                        onDeleteMovie={handleDelete}
+                        navigateToCreateMovie={() => navigate('/CrearPelicula')}
+                    />
 
-                    {/* Sección de Categorías Creadas */}
-                    <section className="custom-categories-section">
-                        <div className="section-header">
-                            <h2><FaFolder className="section-icon" /> Mis Categorías</h2>
-                            <button 
-                                className="add-category-btn" 
-                                onClick={() => navigate('/CrearCategoria')}
-                            >
-                                <FaPlus /> Nueva Categoría
-                            </button>
-                        </div>
-                        
-                        <div className="categories-grid">
-                            {lists.customCategories.map(category => (
-                                <div key={category.id} className="category-card">
-                                    <div className="category-header">
-                                        <h3>{category.name}</h3>
-                                        <span className={`visibility-badge ${category.isPublic ? 'public' : 'private'}`}>
-                                            {category.isPublic ? 'Pública' : 'Privada'}
-                                        </span>
-                                    </div>
-                                    <p className="category-description">{category.description}</p>
-                                    <div className="category-footer d-flex flex-column">
-                                        <div className="category-stats">
-                                            <div className="stat-item">
-                                                <FaList />
-                                                <span>{category.movieCount} películas</span>
-                                            </div>
-                                            <div className="stat-item">
-                                                <FaHeart />
-                                                <span>{category.followers} seguidores</span>
-                                            </div>
-                                        </div>
-                                        <div className="category-actions d-flex flex-column gap-3">
-                                            <button 
-                                                className="action-btn edit-btn"
-                                                onClick={() => handleEditCategory(category)}
-                                            >
-                                                <FaEdit /> Editar
-                                            </button>
-                                            <button 
-                                                className="action-btn delete-btn"
-                                                onClick={() => handleDelete('customCategories', category.id)}
-                                            >
-                                                <FaTrash /> Eliminar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
+                    <CustomCategoriesSection 
+                        categories={lists.customCategories}
+                        onEditCategory={handleEditCategory}
+                        onDeleteCategory={handleDelete}
+                        navigateToCreateCategory={() => navigate('/CrearCategoria')}
+                    />
 
-                    {/* Sección de Favoritos */}
-                    <section className="favorites-section">
-                        <div className="section-header">
-                            <h2><FaHeart className="section-icon" /> Películas Favoritas</h2>
-                            <span className="count-badge">{lists.favorites.length} películas</span>
-                        </div>
-                        
-                        <div className="movies-grid">
-                            {lists.favorites.map(movie => (
-                                <div key={movie.id} className="movie-card">
-                                    <div className="movie-poster-container">
-                                        <img 
-                                            src={movie.poster} 
-                                            alt={movie.title} 
-                                            className="movie-poster"
-                                            onError={(e) => {
-                                                e.target.src = defaultMovieImg;
-                                            }}
-                                        />
-                                        <button 
-                                            className="favorite-btn active"
-                                            onClick={() => handleDelete('favorites', movie.id)}
-                                        >
-                                            <FaHeart />
-                                        </button>
-                                        <div className="user-rating">
-                                            {renderStars(movie.userRating)}
-                                        </div>
-                                    </div>
-                                    <div className="movie-details">
-                                        <h3 className="movie-title">{movie.title} ({movie.year})</h3>
-                                        <p className="movie-meta">
-                                            {movie.director} • {movie.runtime} min • {movie.rating}
-                                        </p>
-                                        <div className="movie-genres">
-                                            {movie.genres.map((genre, index) => (
-                                                <span key={index} className="genre-tag">{genre}</span>
-                                            ))}
-                                        </div>
-                                        <p className="added-date">Agregada: {formatDate(movie.addedDate)}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                    
-                    {/* Sección de Reseñas */}
-                    <section className="reviews-section">
-                        <div className="section-header">
-                            <h2><FaEdit className="section-icon" /> Reseñas Recientes</h2>
-                            <span className="count-badge">{lists.reviews.length} reseñas</span>
-                        </div>
-                        
-                        {lists.reviews.map(movie => (
-                            <div key={movie.id} className="review-card">
-                                <div className="review-header">
-                                    <div className="movie-poster-small">
-                                        <img 
-                                            src={movie.poster} 
-                                            alt={movie.title}
-                                            onError={(e) => {
-                                                e.target.src = defaultMovieImg;
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="review-movie-info">
-                                        <h3 className="movie-title">{movie.title} ({movie.year})</h3>
-                                        <p className="movie-meta">
-                                            {movie.director} • {movie.runtime} min • {movie.rating}
-                                        </p>
-                                        <div className="user-rating">
-                                            {renderStars(movie.userRating)}
-                                            <span className="review-date">{formatDate(movie.reviewDate)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="review-content">
-                                    {editingReview === movie.id ? (
-                                        <>
-                                            <textarea
-                                                className="edit-review-textarea"
-                                                value={editedReviewText}
-                                                onChange={(e) => setEditedReviewText(e.target.value)}
-                                                rows="4"
-                                            />
-                                            <div className="review-edit-actions">
-                                                <button 
-                                                    className="action-btn save-btn"
-                                                    onClick={() => saveEditedReview(movie.id)}
-                                                >
-                                                    Guardar
-                                                </button>
-                                                <button 
-                                                    className="action-btn cancel-btn"
-                                                    onClick={() => setEditingReview(null)}
-                                                >
-                                                    Cancelar
-                                                </button>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <p>{movie.review}</p>
-                                    )}
-                                </div>
-                                {editingReview !== movie.id && (
-                                    <div className="review-actions">
-                                        <button 
-                                            className="action-btn edit-btn"
-                                            onClick={() => handleEditReview(movie)}
-                                        >
-                                            <FaEdit /> Editar
-                                        </button>
-                                        <button 
-                                            className="action-btn delete-btn"
-                                            onClick={() => handleDelete('reviews', movie.id)}
-                                        >
-                                            <FaTrash /> Eliminar
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </section>
+                    <FavoritesSection 
+                        favorites={lists.favorites}
+                        onDeleteFavorite={handleDelete}
+                    />
+
+                    <ReviewsSection 
+                        reviews={lists.reviews}
+                        onEditReview={({ id, review }) => {
+                            setLists(prev => ({
+                                ...prev,
+                                reviews: prev.reviews.map(r => 
+                                    r.id === id ? { ...r, review } : r
+                                )
+                            }));
+                            Swal.fire('¡Guardado!', 'Tu reseña ha sido actualizada.', 'success');
+                        }}
+                        onDeleteReview={handleDelete}
+                    />
                 </div>
         </div>
     </div>
