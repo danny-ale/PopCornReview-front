@@ -15,7 +15,9 @@ export default function CrearPelicula() {
         clasificacion: 'G',
         director: '',
         sinopsis: '',
-        cartel: null
+        cartel: null,
+        reparto: '', 
+        trailerUrl: '' 
     });
 
     const handleChange = (e) => {
@@ -45,15 +47,21 @@ export default function CrearPelicula() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Datos del formulario:', formData);
-        //Aqui van los datos que se van a enviar al servidor
+        
+        const peliculaData = {
+            ...formData,
+            reparto: formData.reparto.split(',').map(actor => actor.trim())
+        };
+        
+        console.log('Datos del formulario:', peliculaData);
+        // Aquí van los datos que se van a enviar al servidor
     };
 
     const handleBack = () => {
         navigate(-1);
     };
 
-return (
+    return (
         <div className="movie-form">
             <h1>Registrar Película</h1>
             <div className="d-flex flex-row">
@@ -67,7 +75,7 @@ return (
                         <div className="image-container">
                             <p>Cartel</p>
                             <img 
-                                src={MovieImg} 
+                                src={previewImage || MovieImg} 
                                 alt="Imagen de la película" 
                                 style={{ width: '200px', height: '300px', borderRadius: '10px' }} 
                             />
@@ -125,6 +133,26 @@ return (
                                 value={formData.director}
                                 onChange={handleChange}
                                 required 
+                            />
+
+                            <label htmlFor="reparto">Reparto (separado por comas)</label>
+                            <input 
+                                type="text" 
+                                id="reparto" 
+                                name="reparto" 
+                                value={formData.reparto}
+                                onChange={handleChange}
+                                placeholder="Ej: Actor 1, Actor 2, Actor 3"
+                            />
+
+                            <label htmlFor="trailerUrl">URL del Trailer</label>
+                            <input 
+                                type="url" 
+                                id="trailerUrl" 
+                                name="trailerUrl" 
+                                value={formData.trailerUrl}
+                                onChange={handleChange}
+                                placeholder="https://www.youtube.com/watch?v=..."
                             />
 
                             <label htmlFor="sinopsis">Sinopsis</label>

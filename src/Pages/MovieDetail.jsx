@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Badge, Tab, Tabs, ListGroup, Alert, Spinner } from 'react-bootstrap';
 import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaThumbsUp, FaThumbsDown, FaArrowLeft, FaEdit } from 'react-icons/fa';
 import '../css/MovieDetail.css';
+import YouTubeVideo from '../Components/YouTubeVideo';
 
 const movieData = {
   id: 1,
@@ -13,6 +14,7 @@ const movieData = {
   rating: 4.8,
   approval: 95,
   duration: "180 min",
+  trailer:"JF8XapyVtnE",
   genre: ["Biografía", "Drama", "Histórico"],
   cast: [
     { name: "Cillian Murphy", role: "J. Robert Oppenheimer" },
@@ -220,6 +222,7 @@ export default function MovieDetail() {
                                 </Col>
                                 ))}
                             </Row>
+                            <YouTubeVideo videoId={movie.trailer} />
                             </div>
                         </Tab>
                         <Tab eventKey="reviews" title={`Reseñas (${reviews.length})`}>
