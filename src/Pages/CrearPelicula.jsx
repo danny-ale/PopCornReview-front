@@ -1,23 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../css/CrearPelicula.css';
 import MovieImg from '../Images/pelicula.jpg';
 import { Button } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Bounce } from "react-toastify";
 
 export default function CrearPelicula() {
     const navigate = useNavigate();
     const [previewImage, setPreviewImage] = useState('pelicula.jpg');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(false);
+    const [categories, setCategories] = useState([]); 
+    const [loadingCategories, setLoadingCategories] = useState(true);
+
+    const fetchCategories = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No se encontró token de autenticación');
+            }
+
+            const response = await fetch('http://localhost:3001/popCornReview/getAll/categories', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al obtener categorías');
+            }
+
+            setCategories(data.data); 
+            setLoadingCategories(false);
+        } catch (error) {
+            console.error('Error al obtener categorías:', error);
+            setError(error.message);
+            setLoadingCategories(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
 
     const [formData, setFormData] = useState({
-        titulo: '',
-        anio: '',
-        clasificacion: 'G',
-        director: '',
-        sinopsis: '',
-        cartel: null,
-        reparto: '', 
-        trailerUrl: '' 
+        IdCategoria: '', 
+        Titulo: '',
+        AnioLanzamiento: '',
+        DuracionMin: '',
+        Clasificacion: 'G',
+        Director: '',
+        Sinopsis: '',
+        Portada: null,
+        Reparto: '', 
+        Trailer: '',
+        IdUsuario: JSON.parse(localStorage.getItem('userData'))?.userId || ''
     });
 
     const handleChange = (e) => {
@@ -33,9 +79,8 @@ export default function CrearPelicula() {
         if (file) {
             setFormData(prev => ({
                 ...prev,
-                cartel: file
+                Portada: file
             }));
-            
             
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -45,16 +90,89 @@ export default function CrearPelicula() {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
+        setError(null);
         
-        const peliculaData = {
-            ...formData,
-            reparto: formData.reparto.split(',').map(actor => actor.trim())
-        };
-        
-        console.log('Datos del formulario:', peliculaData);
-        // Aquí van los datos que se van a enviar al servidor
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No se encontró token de autenticación');
+            }
+
+            const formDataToSend = new FormData();
+            
+            Object.keys(formData).forEach(key => {
+                if (key === 'Portada' && formData[key]) {
+                    formDataToSend.append(key, formData[key]);
+                } else if (formData[key] !== null && formData[key] !== undefined) {
+                    formDataToSend.append(key, formData[key]);
+                }
+            });
+
+            const response = await fetch('http://localhost:3001/popCornReview/create/movie', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formDataToSend
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    toast.warn("La película ya existe", {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    newestOnTop: false,
+                    closeOnClick: false,
+                    rtl: false,
+                    pauseOnFocusLoss: true,
+                    draggable: true,
+                    pauseOnHover: true,
+                    theme: "dark",
+                    transition: Bounce
+                    });
+                } else {
+                    toast.error("Error al crear la película", {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    newestOnTop: false,
+                    closeOnClick: false,
+                    rtl: false,
+                    pauseOnFocusLoss: true,
+                    draggable: true,
+                    pauseOnHover: true,
+                    theme: "dark",
+                    transition: Bounce
+                    });
+                 }
+                return;
+            }
+
+            setSuccess(true);
+            toast.success('Película creada exitosamente', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                transition: Bounce,
+            });
+            
+        } catch (error) {
+            console.error('Error al crear película:', error);
+            setError(error.message || 'Ocurrió un error al crear la película');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleBack = () => {
@@ -81,8 +199,8 @@ export default function CrearPelicula() {
                             />
                             <input 
                                 type="file" 
-                                id="cartel" 
-                                name="cartel" 
+                                id="Portada" 
+                                name="Portada" 
                                 onChange={handleImageChange}
                                 accept="image/*"
                             />
@@ -91,30 +209,57 @@ export default function CrearPelicula() {
 
                     <div className="form-section">
                         <div className="form-fields">
-                            <label htmlFor="titulo">Título de la película</label>
+                            <label htmlFor="Titulo">Título de la película</label>
                             <input 
                                 type="text" 
-                                id="titulo" 
-                                name="titulo" 
+                                id="Titulo" 
+                                name="Titulo" 
                                 value={formData.titulo}
                                 onChange={handleChange}
                                 required 
                             />
                             
-                            <label htmlFor="anio">Año de lanzamiento</label>
+                            <label htmlFor="AnioLanzamiento">Año de lanzamiento</label>
                             <input 
                                 type="number" 
-                                id="anio" 
-                                name="anio" 
+                                id="AnioLanzamiento" 
+                                name="AnioLanzamiento" 
                                 value={formData.anio}
                                 onChange={handleChange}
                                 required 
                             />
 
-                            <label htmlFor="clasificacion">Clasificación</label>
+                            <label htmlFor="DuracionMin">Duración en Minutos</label>
+                            <input 
+                                type="number" 
+                                id="DuracionMin" 
+                                name="DuracionMin" 
+                                value={formData.DuracionMin}
+                                onChange={handleChange}
+                                required 
+                            />
+
+                            <label htmlFor="IdCategoria">Categoría</label>
+                            <select
+                                    id="IdCategoria"
+                                    name="IdCategoria"
+                                    value={formData.IdCategoria}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Seleccione una categoría</option>
+                                    {categories.map(category => (
+                                        <option key={category.Id} value={category.Id}>
+                                            {category.Nombre}
+                                        </option>
+                                    ))}
+                            </select>
+                            
+
+                            <label htmlFor="Clasificacion">Clasificación</label>
                             <select 
-                                id="clasificacion" 
-                                name="clasificacion" 
+                                id="Clasificacion" 
+                                name="Clasificacion" 
                                 value={formData.clasificacion}
                                 onChange={handleChange}
                                 required
@@ -125,31 +270,31 @@ export default function CrearPelicula() {
                                 <option value="R">R</option>
                             </select>
 
-                            <label htmlFor="director">Director</label>
+                            <label htmlFor="Director">Director</label>
                             <input 
                                 type="text" 
-                                id="director" 
-                                name="director" 
+                                id="Director" 
+                                name="Director" 
                                 value={formData.director}
                                 onChange={handleChange}
                                 required 
                             />
 
-                            <label htmlFor="reparto">Reparto (separado por comas)</label>
+                            <label htmlFor="Reparto">Reparto (separado por comas)</label>
                             <input 
                                 type="text" 
-                                id="reparto" 
-                                name="reparto" 
+                                id="Reparto" 
+                                name="Reparto" 
                                 value={formData.reparto}
                                 onChange={handleChange}
                                 placeholder="Ej: Actor 1, Actor 2, Actor 3"
                             />
 
-                            <label htmlFor="trailerUrl">URL del Trailer</label>
+                            <label htmlFor="Trailer">URL del Trailer</label>
                             <input 
                                 type="url" 
-                                id="trailerUrl" 
-                                name="trailerUrl" 
+                                id="Trailer" 
+                                name="Trailer" 
                                 value={formData.trailerUrl}
                                 onChange={handleChange}
                                 placeholder="https://www.youtube.com/watch?v=..."
@@ -157,8 +302,8 @@ export default function CrearPelicula() {
 
                             <label htmlFor="sinopsis">Sinopsis</label>
                             <textarea 
-                                id="sinopsis" 
-                                name="sinopsis" 
+                                id="Sinopsis" 
+                                name="Sinopsis" 
                                 value={formData.sinopsis}
                                 onChange={handleChange}
                                 required
