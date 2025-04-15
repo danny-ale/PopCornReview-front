@@ -13,24 +13,33 @@ export default function CrearCategoria() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
 
-    const [formData, setFormData] = useState({
+    // Estado inicial del formulario
+    const initialFormState = {
         nombre: '',
         descripcion: ''
-    });
+    };
+
+    const [formData, setFormData] = useState(initialFormState);
 
     const validateForm = () => {
         const newErrors = {};
         
+        // Validación del nombre
         if (!formData.nombre.trim()) {
             newErrors.nombre = 'El nombre es requerido';
         } else if (formData.nombre.length < 3) {
             newErrors.nombre = 'El nombre debe tener al menos 3 caracteres';
+        } else if (formData.nombre.length > 50) {
+            newErrors.nombre = 'El nombre no puede exceder los 50 caracteres';
         }
         
+        // Validación de la descripción
         if (!formData.descripcion.trim()) {
             newErrors.descripcion = 'La descripción es requerida';
         } else if (formData.descripcion.length < 10) {
             newErrors.descripcion = 'La descripción debe tener al menos 10 caracteres';
+        } else if (formData.descripcion.length > 255) {
+            newErrors.descripcion = 'La descripción no puede exceder los 255 caracteres';
         }
         
         setErrors(newErrors);
@@ -44,16 +53,38 @@ export default function CrearCategoria() {
             [name]: value
         }));
 
+        // Limpiar error si el usuario está corrigiendo
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
+    };
+
+    // Función para resetear el formulario
+    const resetForm = () => {
+        setFormData(initialFormState);
+        setErrors({});
+        setSubmitError('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitError('');
         
-        if (!validateForm()) return;
+        // Validar el formulario antes de enviar
+        if (!validateForm()) {
+            toast.warn("Por favor complete correctamente todos los campos", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "dark",
+                transition: Bounce,
+            });
+            return;
+        }
+
         setIsSubmitting(true);
         
         try {
@@ -81,37 +112,38 @@ export default function CrearCategoria() {
             
             if (!response.ok) {
                 if (response.status === 400) {
-                  toast.warn("La categoría ya existe", {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    newestOnTop: false,
-                    closeOnClick: false,
-                    rtl: false,
-                    pauseOnFocusLoss: true,
-                    draggable: true,
-                    pauseOnHover: true,
-                    theme: "dark",
-                    transition: Bounce
-                  });
+                    toast.warn("La categoría ya existe", {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        newestOnTop: false,
+                        closeOnClick: false,
+                        rtl: false,
+                        pauseOnFocusLoss: true,
+                        draggable: true,
+                        pauseOnHover: true,
+                        theme: "dark",
+                        transition: Bounce
+                    });
                 } else {
-                  toast.error("Error al crear la categoría", {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    newestOnTop: false,
-                    closeOnClick: false,
-                    rtl: false,
-                    pauseOnFocusLoss: true,
-                    draggable: true,
-                    pauseOnHover: true,
-                    theme: "dark",
-                    transition: Bounce
-                  });
+                    toast.error(data.message || "Error al crear la categoría", {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        newestOnTop: false,
+                        closeOnClick: false,
+                        rtl: false,
+                        pauseOnFocusLoss: true,
+                        draggable: true,
+                        pauseOnHover: true,
+                        theme: "dark",
+                        transition: Bounce
+                    });
                 }
                 return;
-              }
+            }
             
+            // Mostrar mensaje de éxito y limpiar el formulario
             toast.success('Categoría creada exitosamente', {
                 position: "top-right",
                 autoClose: 5000,
@@ -122,11 +154,13 @@ export default function CrearCategoria() {
                 progress: undefined,
                 theme: "dark",
                 transition: Bounce,
+                onClose: resetForm // Limpiar el formulario cuando el toast se cierre
             });
 
         } catch (error) {
             console.error('Error:', error);
-            toast.error("Error al crear la categoría", {
+            setSubmitError(error.message || 'Ocurrió un error al crear la categoría');
+            toast.error(error.message || "Error al crear la categoría", {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -148,7 +182,6 @@ export default function CrearCategoria() {
         navigate(-1);
     };
 
-
     return (
         <div className="d-flex flex-row">
             <div className='py-5 px-4'>
@@ -164,7 +197,7 @@ export default function CrearCategoria() {
                     </div>
                 )}
                 <form onSubmit={handleSubmit} className="form-fields">
-                    <label htmlFor="nombre">Nombre</label>
+                    <label htmlFor="nombre">Nombre*</label>
                     <input 
                         type="text" 
                         id="nombre" 
@@ -173,10 +206,11 @@ export default function CrearCategoria() {
                         onChange={handleChange}
                         className={errors.nombre ? 'error' : ''}
                         disabled={isSubmitting}
+                        placeholder="Ej: Acción, Comedia, Drama"
                     />
                     {errors.nombre && <p className="error-message">{errors.nombre}</p>}
                     
-                    <label htmlFor="descripcion">Descripción</label>
+                    <label htmlFor="descripcion">Descripción*</label>
                     <textarea 
                         id="descripcion" 
                         name="descripcion" 
@@ -184,6 +218,8 @@ export default function CrearCategoria() {
                         onChange={handleChange}
                         className={errors.descripcion ? 'error' : ''}
                         disabled={isSubmitting}
+                        placeholder="Describe las características de esta categoría"
+                        rows="4"
                     />
                     {errors.descripcion && <p className="error-message">{errors.descripcion}</p>}
                     
@@ -196,6 +232,7 @@ export default function CrearCategoria() {
                     </button>
                 </form>
             </div>
+            <ToastContainer />
         </div>
     );
 };
