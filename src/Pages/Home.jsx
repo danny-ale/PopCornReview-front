@@ -17,84 +17,119 @@ export default function Home() {
   const [topRatedMovies, setTopRatedMovies] = useState([]);
   const [mostReviewedMovies, setMostReviewedMovies] = useState([]);
   const [newlyAddedMovies, setNewlyAddedMovies] = useState([]);
+  const [recommendedMovies, setRecommendedMovies] = useState([]);
   const navigate = useNavigate();
 
+
   useEffect(() => {
-    // Simulando llamada a la API
     const fetchMovies = async () => {
       setIsLoading(true);
       try {
-        // En una aplicación real, aquí harías fetch a tu API
-        // const response = await fetch('tu-api-endpoint');
-        // const data = await response.json();
-        
-        // Datos de ejemplo (simulando respuesta de API)
-        const mockData = {
-          featured: [
-            { 
-              id: 1,
-              title: "Oppenheimer", 
-              image: "https://www.eyeforfilm.co.uk/images/stills/o/oppenheimer_2023_poster.jpg", 
-              likes: 95, 
-              dislikes: 5,
-              year: 2023,
-              director: "Christopher Nolan",
-              badgeText: "Top 1"
-            },
-            // ... otros datos de películas destacadas
-          ],
-          topRated: [
-            { 
-              id: 4,
-              title: "El Padrino", 
-              image: "https://diariodeunacinefila.files.wordpress.com/2011/09/poster-de-el-padrino.jpg", 
-              rating: 5.0,
-              year: 1972,
-              director: "Francis Ford Coppola",
-              badgeText: "Clásico"
-            },
-            // ... otros datos de películas mejor calificadas
-          ],
-          mostReviewed: [
-            { 
-              id: 17,
-              title: "Avengers: Endgame", 
-              image: "https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_.jpg", 
-              rating: 4.7,
-              year: 2019,
-              director: "Hermanos Russo",
-              reviews: 12543,
-              stars: 4.5
-            },
-            // ... otros datos de películas con más reseñas
-          ],
-          newlyAdded: [
-            { 
-              id: 21,
-              title: "Duna: Parte Dos", 
-              image: "https://m.media-amazon.com/images/M/MV5BN2QyZGU4ZDctOWMzMy00NTc5LThlOGQtODhmNDI1NmY5YzAwXkEyXkFqcGdeQXVyMDM2NDM2MQ@@._V1_FMjpg_UX1000_.jpg", 
-              year: 2024,
-              director: "Denis Villeneuve",
-              addedDate: "Hace 3 días",
-              hasReview: false
-            },
-            // ... otros datos de películas recién agregadas
-          ]
+        const token = localStorage.getItem('token');
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         };
+  
+        // Llamadas paralelas a las APIs
+        const [featuredResponse, topRatedResponse, mostReviewedResponse,newAddResponse] = await Promise.all([
+          fetch('http://localhost:3001/popCornReview/getMostFeatured/movie', { headers }),
+          fetch('http://localhost:3001/popCornReview/getMostStarts/movie', { headers }),
+          fetch('http://localhost:3001/popCornReview/getMostReviewed/movie', { headers }),
+          fetch('http://localhost:3001/popCornReview/getRecent/movie', { headers })
+        ]);
+  
 
-        setFeaturedMovies(mockData.featured);
-        setTopRatedMovies(mockData.topRated);
-        setMostReviewedMovies(mockData.mostReviewed);
-        setNewlyAddedMovies(mockData.newlyAdded);
+        if (!featuredResponse.ok || !topRatedResponse.ok || !mostReviewedResponse.ok || !newAddResponse.ok) {
+          throw new Error('Error al obtener datos de películas');
+        }
+  
+
+        const featuredData = await featuredResponse.json();
+        const topRatedData = await topRatedResponse.json();
+        const mostReviewedData = await mostReviewedResponse.json();
+        const newAddData = await newAddResponse.json();
+  
+
+        setFeaturedMovies(featuredData.data.map(movie => ({
+          id: movie.Id,
+          title: movie.Titulo,
+          year: movie.Año_Lanzamiento,
+          director: movie.Director,
+          image: movie.Portada ? `data:image/jpeg;base64,${arrayBufferToBase64(movie.Portada.data)}` : placeholderImage,
+          likes: movie.Recomendaciones_Positivas,
+          dislikes: movie.Recomendaciones_Negativas,
+          badgeText: `${movie.Porcentaje_Pos}% positivas`
+        })));
+  
+        setTopRatedMovies(topRatedData.data.map(movie => ({
+          id: movie.Id,
+          title: movie.Titulo,
+          year: movie.Año_Lanzamiento,
+          director: movie.Director,
+          image: movie.Portada ? `data:image/jpeg;base64,${arrayBufferToBase64(movie.Portada.data)}` : placeholderImage,
+          rating: parseFloat(movie.Promedio_Estrellas),
+          badgeText: `${parseFloat(movie.Promedio_Estrellas).toFixed(1)} ★`
+        })));
+  
+        setMostReviewedMovies(mostReviewedData.data.map(movie => ({
+          id: movie.Id,
+          title: movie.Titulo,
+          year: movie.Año_Lanzamiento,
+          director: movie.Director,
+          image: movie.Portada ? `data:image/jpeg;base64,${arrayBufferToBase64(movie.Portada.data)}` : placeholderImage,
+          reviews: movie.Total_Reseñas,
+          rating:movie.Promedio_Estrellas
+        })));
+
+        setNewlyAddedMovies(newAddData.data.map(movie => ({
+          id: movie.Id,
+          title: movie.Titulo,
+          year: movie.Año_Lanzamiento,
+          director: movie.Director
+        })));
+
+        setRecommendedMovies(
+          topRatedData.data.slice(0, 5).map((movie, index) => ({
+            title: movie.Titulo,
+            rating: parseFloat(movie.Promedio_Estrellas),
+            id: movie.Id
+        })));
+ 
+  
       } catch (error) {
         console.error("Error fetching movies:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     fetchMovies();
   }, []);
+
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
+
+  const formatAddedDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Hoy';
+    if (diffDays === 1) return 'Ayer';
+    return `Hace ${diffDays} días`;
+  };
+
+
+  const placeholderImage = 'https://via.placeholder.com/300x450?text=No+Image';
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value); 
@@ -129,14 +164,6 @@ export default function Home() {
     navigate('/');
   };
 
-  const recommendedMovies = [
-    { title: "Oppenheimer", rating: 4.5 },
-    { title: "Barbie", rating: 4.0 },
-    { title: "John Wick 4", rating: 4.8 },
-    { title: "Avatar: El Camino del Agua", rating: 4.3 },
-    { title: "Guardians of the Galaxy Vol. 3", rating: 4.6 }
-  ];
-
 const carouselItems = [
   {
     title: "Los Oscar 2025: ¡Los nominados ya están aquí!",
@@ -156,11 +183,11 @@ const carouselItems = [
 ];
 
 
-
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-        <Spinner animation="border" variant="danger" />
+      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" variant="danger" size="lg" />
+        <p className="mt-3">Cargando películas...</p>
       </div>
     );
   }
