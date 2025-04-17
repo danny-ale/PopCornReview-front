@@ -4,7 +4,7 @@ import { FaEdit } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import '../css/HomePageCSS.css';
 
-const Card_NewlyMovies = ({ movies, navigateToMovie, navigateToReviewForm }) => {
+const Card_NewlyMovies = ({ movies, navigateToMovie }) => {
   return (
     <Container className="my-5 d-flex flex-column">
       <h2 className="section-title">
@@ -35,7 +35,7 @@ const Card_NewlyMovies = ({ movies, navigateToMovie, navigateToReviewForm }) => 
                   <Button 
                     variant="outline-danger" 
                     className="mt-auto review-button"
-                    onClick={() => navigateToReviewForm(movie.id)}
+                    onClick={() => navigateToMovie(movie.id)}
                   >
                     <FaEdit className="me-2" />
                     Crear Primera Reseña
@@ -66,13 +66,11 @@ Card_NewlyMovies.propTypes = {
       hasReview: PropTypes.bool
     })
   ).isRequired,
-  navigateToMovie: PropTypes.func,
-  navigateToReviewForm: PropTypes.func
+  navigateToMovie: PropTypes.func
 };
 
 Card_NewlyMovies.defaultProps = {
   navigateToMovie: () => {},
-  navigateToReviewForm: () => {},
   movies: []
 };
 

@@ -77,7 +77,7 @@ function App() {
           </ProtectedRoute>
         } />
         
-        <Route path="/movie" element={
+        <Route path="/movie/:userId/:movieId" element={
           <ProtectedRoute>
             <MovieDetail />
           </ProtectedRoute>

@@ -31,7 +31,7 @@ export default function Home() {
           'Content-Type': 'application/json'
         };
   
-        // Llamadas paralelas a las APIs
+
         const [featuredResponse, topRatedResponse, mostReviewedResponse,newAddResponse] = await Promise.all([
           fetch('http://localhost:3001/popCornReview/getMostFeatured/movie', { headers }),
           fetch('http://localhost:3001/popCornReview/getMostStarts/movie', { headers }),
@@ -143,14 +143,14 @@ export default function Home() {
   };
 
   const navigateToMovie = (movieId) => {
-    //navigate(`/movie/${movieId}`);
-    navigate('/movie');
-
-  };
-
-  const navigateToReviewForm = (movieId) => {
-    //navigate(`/movies/${movieId}/review/new`);
-    navigate('/movie');
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    const userId = userData?.userId;
+    //console.log(`User ID: ${userId}, Movie ID: ${movieId}`);
+    if(userId==null){
+      navigate('/login');
+      return;
+    }
+    navigate(`/movie/${userId}/${movieId}`);
 
   };
 
@@ -300,7 +300,6 @@ const carouselItems = [
           <FeaturedMovies 
             movies={featuredMovies} 
             navigateToMovie={navigateToMovie}
-            navigateToReviewForm={navigateToReviewForm}
           />
         )}
 
@@ -308,7 +307,6 @@ const carouselItems = [
           <TopRatedMovies 
             movies={topRatedMovies} 
             navigateToMovie={navigateToMovie}
-            navigateToReviewForm={navigateToReviewForm}
           />
         )}
 
@@ -316,7 +314,6 @@ const carouselItems = [
           <MostReviewedMovies 
             movies={mostReviewedMovies} 
             navigateToMovie={navigateToMovie}
-            navigateToReviewForm={navigateToReviewForm}
           />
         )}
 
@@ -324,7 +321,6 @@ const carouselItems = [
           <NewlyAddedMovies 
             movies={newlyAddedMovies} 
             navigateToMovie={navigateToMovie}
-            navigateToReviewForm={navigateToReviewForm}
           />
         )}
 

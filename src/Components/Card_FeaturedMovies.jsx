@@ -4,7 +4,7 @@ import { FaThumbsUp, FaThumbsDown, FaFire } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import '../css/HomePageCSS.css';
 
-const Card_FeaturedMovies = ({ movies, navigateToMovie, navigateToReviewForm }) => {
+const Card_FeaturedMovies = ({ movies, navigateToMovie }) => {
   return (
     <Container className="my-5 d-flex flex-column">
       <h2 className="section-title">
@@ -23,7 +23,7 @@ const Card_FeaturedMovies = ({ movies, navigateToMovie, navigateToReviewForm }) 
                   </div>
                 )}
                 <div className="movie-overlay">
-                  <Button variant="danger" size="sm" onClick={() => navigateToReviewForm(movie.id)}>
+                  <Button variant="danger" size="sm" onClick={() => navigateToMovie(movie.id)}>
                     Ver detalles
                   </Button>
                 </div>
@@ -72,13 +72,11 @@ Card_FeaturedMovies.propTypes = {
       badgeText: PropTypes.string
     })
   ).isRequired,
-  navigateToMovie: PropTypes.func,
-  navigateToReviewForm: PropTypes.func
+  navigateToMovie: PropTypes.func
 };
 
 Card_FeaturedMovies.defaultProps = {
-  navigateToMovie: () => {},
-  navigateToReviewForm: () => {}
+  navigateToMovie: () => {}
 };
 
 export default Card_FeaturedMovies;

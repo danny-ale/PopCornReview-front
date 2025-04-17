@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Badge, Tab, Tabs, ListGroup, Alert, Spinner } from 'react-bootstrap';
 import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaThumbsUp, FaThumbsDown, FaArrowLeft, FaEdit } from 'react-icons/fa';
@@ -6,54 +6,25 @@ import '../css/MovieDetail.css';
 import YouTubeVideo from '../Components/YouTubeVideo';
 
 const movieData = {
-  id: 1,
-  title: "Oppenheimer",
-  image: "https://www.eyeforfilm.co.uk/images/stills/o/oppenheimer_2023_poster.jpg",
-  year: 2023,
-  director: "Christopher Nolan",
-  rating: 4.8,
-  approval: 95,
-  duration: "180 min",
-  trailer:"JF8XapyVtnE",
-  genre: ["Biografía", "Drama", "Histórico"],
-  cast: [
-    { name: "Cillian Murphy", role: "J. Robert Oppenheimer" },
-    { name: "Emily Blunt", role: "Kitty Oppenheimer" },
-    { name: "Matt Damon", role: "Leslie Groves" },
-    { name: "Robert Downey Jr.", role: "Lewis Strauss" },
-    { name: "Florence Pugh", role: "Jean Tatlock" }
-  ],
-  synopsis: "La historia del físico J. Robert Oppenheimer y su papel en el desarrollo de la bomba atómica durante la Segunda Guerra Mundial. Una mirada intensa a su vida, sus contribuciones y las consecuencias morales de su trabajo.",
-  reviews: [
-    {
-      id: 1,
-      author: "María González",
-      rating: 5,
-      date: "2023-08-15",
-      comment: "Una obra maestra del cine moderno. Nolan supera todas las expectativas con esta biografía intensa y visualmente impresionante.",
-      likes: 124,
-      dislikes: 3,
-      userComments: [
-        { id: 1, author: "Juan Pérez", comment: "Totalmente de acuerdo, la actuación de Cillian Murphy es increíble", date: "2023-08-16" },
-        { id: 2, author: "Ana López", comment: "La escena de la prueba Trinity es de lo mejor que he visto en cine", date: "2023-08-17" }
-      ]
-    },
-    {
-      id: 2,
-      author: "Carlos Ruiz",
-      rating: 4,
-      date: "2023-08-20",
-      comment: "Excelente película aunque un poco larga. La fotografía y el sonido son espectaculares, merece verse en IMAX.",
-      likes: 89,
-      dislikes: 7,
-      userComments: [
-        { id: 3, author: "Laura Méndez", comment: "A mí también me pareció un poco larga, pero vale cada minuto", date: "2023-08-21" }
-      ]
-    }
-  ]
+  id: null,
+  title: "",
+  image: "",
+  year: null,
+  director: "",
+  rating: 0,
+  approval: 0,
+  duration: "",
+  trailer: "",
+  genre: [],
+  cast: [],
+  synopsis: "",
+  reviews: []
 };
 
+
 export default function MovieDetail() {
+  const { userId, movieId } = useParams();
+  console.log(`User ID: ${userId}, Movie ID: ${movieId}`);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
   const [review, setReview] = useState({ rating: 0, comment: '', liked: null });
@@ -63,6 +34,111 @@ export default function MovieDetail() {
   const [movie, setMovie] = useState(movieData);
   const [loading, setLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+
+
+  useEffect(() => {
+    const fetchMovieDetails = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+
+        const response = await fetch(
+          `http://localhost:3001/popCornReview/getDetailMovie/${userId}/${movieId}`,
+          { headers }
+        );
+
+        if (!response.ok) {
+          throw new Error('Error al obtener detalles de la película');
+        }
+
+        const apiData = await response.json();
+        
+        const transformedData = {
+          id: apiData.data.pelicula.Id,
+          title: apiData.data.pelicula.Titulo,
+          image: apiData.data.pelicula.Portada 
+            ? `data:image/jpeg;base64,${arrayBufferToBase64(apiData.data.pelicula.Portada.data)}` 
+            : 'https://via.placeholder.com/300x450?text=No+Image',
+          year: apiData.data.pelicula.Año_Lanzamiento,
+          director: apiData.data.pelicula.Director,
+          rating: parseFloat(apiData.data.pelicula.Promedio_Estrellas) || 0,
+          approval: apiData.data.pelicula.Porcentaje_Pos 
+            ? parseFloat(apiData.data.pelicula.Porcentaje_Pos) 
+            : 0,
+          duration: `${apiData.data.pelicula.Duración_Min} min`,
+          trailer: extractYoutubeId(apiData.data.pelicula.Trailer),
+          genre: [apiData.data.pelicula.Nombre_Categoria],
+          cast: processCast(apiData.data.pelicula.Reparto),
+          synopsis: apiData.data.pelicula.Sinopsis,
+          reviews: apiData.data.resenas.map(review => ({
+            id: review.IdReseña,
+            author: review.Nombre_Usuario,
+            rating: review.Calificación,
+            date: new Date(review.Fecha).toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            comment: review.Contenido,
+            likes: review.Recomendada === 1 ? 1 : 0,
+            dislikes: review.Recomendada === 0 ? 1 : 0,
+            userComments: review.comentarios.map(comment => ({
+              id: comment.IdComentario,
+              author: comment.Nombre_Usuario || `Usuario ${comment.Id_Usuario}`,
+              comment: comment.Contenido,
+              date: new Date(comment.Fecha).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })
+            }))
+          })),
+          isFavorite: apiData.data.pelicula.EstaEnFavoritos === 1
+        };
+        setMovie(transformedData);
+      } catch (err) {
+        console.log(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMovieDetails();
+  }, [userId, movieId]);
+
+
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
+
+  const extractYoutubeId = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+
+  const processCast = (reparto) => {
+    if (!reparto) return [];
+    return reparto.split(',').map(actor => {
+      const [name] = actor.split(' as ').map(s => s.trim());
+      return {
+        name: name || actor.trim()
+      };
+    });
+  };
+
 
   const handleBack = () => {
     navigate(-1);
@@ -218,18 +294,18 @@ export default function MovieDetail() {
                             <Row>
                                 {movie.cast.map((person, i) => (
                                 <Col key={i} sm={6} md={4} className="mb-2">
-                                    <strong>{person.name}</strong> como {person.role}
+                                    <strong>{person.name}</strong>
                                 </Col>
                                 ))}
                             </Row>
                             <YouTubeVideo videoId={movie.trailer} />
                             </div>
                         </Tab>
-                        <Tab eventKey="reviews" title={`Reseñas (${reviews.length})`}>
+                        <Tab eventKey="reviews" title={`Reseñas (${movie?.reviews?.length || 0})`}>
                             <div className="mt-3">
-                            {reviews.length > 0 ? (
+                            {movie?.reviews?.length > 0 ? (
                                 <ListGroup variant="flush">
-                                {reviews.map((r) => (
+                                {movie?.reviews?.map((r) => (
                                     <ListGroup.Item key={r.id} className="bg-dark text-white border-secondary">
                                     <div className="d-flex justify-content-between mb-2">
                                         <div>
@@ -241,7 +317,8 @@ export default function MovieDetail() {
                                     </div>
                                     <p>{r.comment}</p>
                                     
-                                    <div className="d-flex align-items-center mb-3">
+                                    <div className="d-flex align-items-center mb-3 gap-2">
+                                        <span>La recomienda:</span>
                                         <Button variant="outline-success" size="sm" className="me-2">
                                         <FaThumbsUp className="me-1" /> {r.likes}
                                         </Button>

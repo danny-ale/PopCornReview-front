@@ -4,7 +4,7 @@ import { FaStar, FaCrown } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import '../css/HomePageCSS.css';
 
-const Card_TopRatedMovies = ({ movies, navigateToMovie, navigateToReviewForm }) => {
+const Card_TopRatedMovies = ({ movies, navigateToMovie }) => {
   return (
     <Container className="my-5 d-flex flex-column">
       <h2 className="section-title">
@@ -68,13 +68,11 @@ Card_TopRatedMovies.propTypes = {
       badgeText: PropTypes.string
     })
   ).isRequired,
-  navigateToMovie: PropTypes.func,
-  navigateToReviewForm: PropTypes.func
+  navigateToMovie: PropTypes.func
 };
 
 Card_TopRatedMovies.defaultProps = {
-  navigateToMovie: () => {},
-  navigateToReviewForm: () => {}
+  navigateToMovie: () => {}
 };
 
 export default Card_TopRatedMovies;

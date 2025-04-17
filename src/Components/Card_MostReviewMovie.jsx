@@ -4,7 +4,7 @@ import { FaStar, FaComment } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import '../css/HomePageCSS.css';
 
-const Card_MostReviewMovie = ({ movies, navigateToMovie, navigateToReviewForm }) => {
+const Card_MostReviewMovie = ({ movies, navigateToMovie}) => {
   // Función para manejar valores seguros
   const getSafeValue = (value, defaultValue = 0) => {
     return value !== undefined && value !== null ? value : defaultValue;
@@ -22,7 +22,7 @@ const Card_MostReviewMovie = ({ movies, navigateToMovie, navigateToReviewForm })
           const image = movie.image ? `data:image/jpeg;base64,${movie.image}` : 'placeholder-image-url';
 
           return (
-            <Col key={movie.Id} xl={3} lg={3} md={6} sm={6} xs={12}>
+            <Col key={movie.id} xl={3} lg={3} md={6} sm={6} xs={12}>
               <Card className="review-card h-100" onClick={() => navigateToMovie(movie.id)}>
                 <div className="movie-poster-container">
                   <Card.Img 
@@ -85,13 +85,11 @@ Card_MostReviewMovie.propTypes = {
       ])
     })
   ).isRequired,
-  navigateToMovie: PropTypes.func,
-  navigateToReviewForm: PropTypes.func
+  navigateToMovie: PropTypes.func
 };
 
 Card_MostReviewMovie.defaultProps = {
   navigateToMovie: () => {},
-  navigateToReviewForm: () => {},
   movies: []
 };
 
