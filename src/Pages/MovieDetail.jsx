@@ -28,12 +28,13 @@ export default function MovieDetail() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
   const [review, setReview] = useState({ rating: 0, comment: '', liked: null });
-  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState({}); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reviews, setReviews] = useState(movieData.reviews);
   const [movie, setMovie] = useState(movieData);
   const [loading, setLoading] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(movie?.isFavorite || false);
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
 
 
   useEffect(() => {
@@ -148,51 +149,165 @@ export default function MovieDetail() {
     setReview({ ...review, rating });
   };
 
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
+
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    const userId = userData?.userId;
+    const userName = userData?.name;
+  
+    if (!userId) {
+      console.log('No hay userId');
+      return;
+    }
+
+    if (review.rating === 0 || review.comment.trim() === '' || review.liked === null) {
+      alert('Por favor completa todos los campos de la reseña: calificación, comentario y si recomiendas la película');
+      return; 
+    }
+
     setIsSubmitting(true);
     
-    setTimeout(() => {
-      const newReview = {
-        id: reviews.length + 1,
-        author: "Tú",
-        rating: review.rating,
-        date: new Date().toISOString().split('T')[0],
-        comment: review.comment,
-        likes: 0,
-        dislikes: 0,
-        userComments: []
-      };
+    try {
+      const response = await fetch('http://localhost:3001/popCornReview/create/review', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          idUsuario: userId,
+          idPelicula: movie.id,
+          calificacion: review.rating,
+          contenido: review.comment,
+          recomendada: review.liked
+        })
+      });
       
-      setReviews([...reviews, newReview]);
-      setReview({ rating: 0, comment: '' });
+      if (!response.ok) {
+        throw new Error('Error al crear la reseña');
+      }
+  
+      await response.json();
+      const tempId = Date.now();
+  
+      setMovie(prevMovie => ({
+        ...prevMovie,
+        reviews: [
+          {
+            id: tempId,
+            author: userName,
+            rating: review.rating,
+            date: new Date().toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            comment: review.comment,
+            likes: review.liked ? 1 : 0,
+            dislikes: review.liked ? 0 : 1,
+            userComments: []
+          },
+          ...prevMovie.reviews
+        ]
+      }));
+  
+      setReview({
+        rating: 0,
+        comment: '',
+        liked: null
+      });
+  
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Hubo un error al enviar tu reseña');
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
-  const handleCommentSubmit = (reviewId, e) => {
+  const handleCommentChange = (reviewId, value) => {
+    setComments(prev => ({
+      ...prev,
+      [reviewId]: value
+    }));
+  };
+
+  const handleCommentSubmit = async (reviewId, e) => {
     e.preventDefault();
     
-    const updatedReviews = reviews.map(r => {
-      if (r.id === reviewId) {
-        return {
-          ...r,
-          userComments: [
-            ...r.userComments,
-            {
-              id: r.userComments.length + 1,
-              author: "Tú",
-              comment: comment,
-              date: new Date().toISOString().split('T')[0]
-            }
-          ]
-        };
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    const userId = userData?.userId;
+    const userName = userData?.name;
+  
+    if (!userId) {
+      console.log('Debes iniciar sesión para comentar');
+      return;
+    }
+  
+    const commentText = comments[reviewId] || '';
+  
+    if (!commentText.trim()) {
+      alert('El comentario no puede estar vacío');
+      return;
+    }
+  
+    try {
+      const response = await fetch('http://localhost:3001/popCornReview/create/comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          idUsuario: userId,
+          idReseña: reviewId,
+          contenido: commentText
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al crear el comentario');
       }
-      return r;
-    });
-    
-    setReviews(updatedReviews);
-    setComment('');
+  
+      await response.json();
+      const tempId = Date.now();
+  
+      setMovie(prevMovie => ({
+        ...prevMovie,
+        reviews: prevMovie.reviews.map(r => {
+          if (r.id === reviewId) {
+            return {
+              ...r,
+              userComments: [
+                {
+                  id: tempId, 
+                  author: userName,
+                  comment: commentText,
+                  date: new Date().toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })
+                },
+                ...r.userComments
+              ]
+            };
+          }
+          return r;
+        })
+      }));
+  
+      setComments(prev => {
+        const newComments = {...prev};
+        delete newComments[reviewId];
+        return newComments;
+      });
+  
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Hubo un error al enviar tu comentario');
+    }
   };
 
   const renderStars = (rating) => {
@@ -201,8 +316,50 @@ export default function MovieDetail() {
     ));
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const toggleFavorite = async () => {
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    const userId = userData?.userId;
+  
+    if (!userId) {
+      alert('Debes iniciar sesión para gestionar favoritos');
+      return;
+    }
+  
+    setIsFavoriteLoading(true);
+  
+    try {
+      const endpoint = movie?.isFavorite ? 'http://localhost:3001/popCornReview/remove/favorite' : 'http://localhost:3001/popCornReview/create/favorite';
+      const method = movie?.isFavorite ? 'DELETE' : 'POST';
+  
+      const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          idUsuario: userId,
+          idPelicula: movie.id
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error al ${movie?.isFavorite ? 'eliminar' : 'agregar'} favorito`);
+      }
+  
+      setIsFavorite(!movie?.isFavorite);
+      
+      setMovie(prev => ({
+        ...prev,
+        isFavorite: !movie?.isFavorite
+      }));
+  
+    } catch (error) {
+      console.error('Error:', error);
+      alert(`Hubo un error al ${movie?.isFavorite ? 'quitar' : 'agregar'} la película de favoritos`);
+    } finally {
+      setIsFavoriteLoading(false);
+    }
   };
 
   return (
@@ -224,13 +381,20 @@ export default function MovieDetail() {
                 <Row className="mb-4">
                 <Col lg={4} className="mb-4 mb-lg-0 position-relative">
                     <Card className="bg-dark text-white border-light h-100">
-                      <Button 
+                    <Button 
                         variant="link" 
-                        className={`position-absolute top-0 end-0 p-2 favorite-btn ${isFavorite ? 'text-danger' : 'text-white'}`}
+                        className={`position-absolute top-0 end-0 p-2 favorite-btn ${movie?.isFavorite ? 'text-danger' : 'text-white'}`}
                         onClick={toggleFavorite}
-                        aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+                        aria-label={movie?.isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+                        disabled={isFavoriteLoading}
                       >
-                        {isFavorite ? <FaHeart size={24} /> : <FaRegHeart size={24} />}
+                        {isFavoriteLoading ? (
+                          <Spinner as="span" animation="border" size="sm" />
+                        ) : movie?.isFavorite ? (
+                          <FaHeart size={24} />
+                        ) : (
+                          <FaRegHeart size={24} />
+                        )}
                       </Button>
                       
                       <Card.Img variant="top" src={movie.image} alt={movie.title} />
@@ -248,11 +412,14 @@ export default function MovieDetail() {
                         </Badge>
                         
                         <Button 
-                          variant={isFavorite ? "outline-danger" : "outline-light"} 
+                          variant={movie?.isFavorite ? "outline-danger" : "outline-light"} 
                           onClick={toggleFavorite}
                           className="mt-2 d-flex align-items-center justify-content-center gap-2 w-100"
+                          disabled={isFavoriteLoading}
                         >
-                          {isFavorite ? (
+                          {isFavoriteLoading ? (
+                            <Spinner as="span" animation="border" size="sm" />
+                          ) : movie?.isFavorite ? (
                             <>
                               <FaHeart /> En favoritos
                             </>
@@ -319,10 +486,10 @@ export default function MovieDetail() {
                                     
                                     <div className="d-flex align-items-center mb-3 gap-2">
                                         <span>La recomienda:</span>
-                                        <Button variant="outline-success" size="sm" className="me-2">
+                                        <Button variant="outline-success" size="sm" className="me-2" style={{ pointerEvents: 'none', backgroundColor: 'transparent', borderColor: 'green', color: 'green' }}>
                                         <FaThumbsUp className="me-1" /> {r.likes}
                                         </Button>
-                                        <Button variant="outline-danger" size="sm" className="me-3">
+                                        <Button variant="outline-danger" size="sm" className="me-3" style={{ pointerEvents: 'none', backgroundColor: 'transparent', borderColor: 'red', color: 'red' }}>
                                         <FaThumbsDown className="me-1" /> {r.dislikes}
                                         </Button>
                                     </div>
@@ -345,20 +512,20 @@ export default function MovieDetail() {
                                     )}
                                     
                                     <Form onSubmit={(e) => handleCommentSubmit(r.id, e)}>
-                                        <Form.Group className="mb-3">
-                                        <Form.Control
-                                            as="textarea"
-                                            rows={2}
-                                            placeholder="Escribe tu comentario..."
-                                            value={comment}
-                                            onChange={(e) => setComment(e.target.value)}
-                                            required
-                                        />
-                                        </Form.Group>
-                                        <Button variant="outline-light" size="sm" type="submit">
-                                        <FaEdit className="me-1" /> Comentar
-                                        </Button>
-                                    </Form>
+                                    <Form.Group className="mb-3">
+                                      <Form.Control
+                                        as="textarea"
+                                        rows={2}
+                                        placeholder="Escribe tu comentario..."
+                                        value={comments[r.id] || ''}
+                                        onChange={(e) => handleCommentChange(r.id, e.target.value)}
+                                        required
+                                      />
+                                    </Form.Group>
+                                    <Button variant="outline-light" size="sm" type="submit">
+                                      <FaEdit className="me-1" /> Comentar
+                                    </Button>
+                                  </Form>
                                     </ListGroup.Item>
                                 ))}
                                 </ListGroup>
@@ -430,7 +597,7 @@ export default function MovieDetail() {
                         />
                       </Form.Group>
                       
-                      <Button variant="danger" type="submit" disabled={isSubmitting || review.rating === 0}>
+                      <Button variant="danger" type="submit" disabled={isSubmitting || review.rating === 0|| review.liked === null}>
                         {isSubmitting ? (
                           <>
                             <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
