@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Button, Form, Dropdown, NavDropdown, Image, Modal, Badge } from 'react-bootstrap';
+import { Container, Button, Form, Dropdown, NavDropdown, Image, Modal, Spinner } from 'react-bootstrap';
 import { FaSearch, FaUser, FaTags, FaFilm, FaSignOutAlt, FaEdit, FaCalendarAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Logo2 from '../Images/Logooo.jpg';
 import UserImg from '../Images/usuario.jpg';
@@ -12,15 +12,97 @@ export default function PerfilUsuario() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState({
-    Nombre: "EjemploUsuario",
-    Correo: "ejemplo@correo.com",
-    Fecha_Nac: "2000-01-01",
-    Descripción: "Amante del cine clásico y las películas de ciencia ficción",
-    Contraseña: "passwordEjemplo",
-    Imagen: UserImg
+    Id: null,
+    Nombre: "",
+    Correo: "",
+    Fecha_Nac: "",
+    Descripción: "",
+    Contraseña: "",
+    Imagen: "" 
   });
   const [editData, setEditData] = useState({...userData});
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+    
+        const userDataLS = JSON.parse(localStorage.getItem('userData'));
+        const userId = userDataLS?.userId;
+        const token = localStorage.getItem('token');
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+
+        const response = await fetch(
+          `http://localhost:3001/popCornReview/getInfo/${userId}`,
+          { headers }
+        );
+        if (!response.ok) {
+          throw new Error('Error al obtener los datos del usuario');
+        }
+        
+        const result = await response.json();
+        
+        
+        setUserData({
+          Id: result.data.Id,
+          Nombre: result.data.Nombre,
+          Correo: result.data.Correo,
+          Fecha_Nac: result.data.Fecha_Nac.split('T')[0], 
+          Descripción: result.data.Descripción || "No hay descripción",
+          Contraseña: result.data.Contraseña,
+          Imagen: result.data.Imagen ? `data:image/jpeg;base64,${arrayBufferToBase64(result.data.Imagen)}` : UserImg
+        });
+        
+        setEditData({
+          Id: result.data.Id,
+          Nombre: result.data.Nombre,
+          Correo: result.data.Correo,
+          Fecha_Nac: result.data.Fecha_Nac.split('T')[0],
+          Descripción: result.data.Descripción || "",
+          Contraseña: result.data.Contraseña,
+          Imagen: result.data.Imagen ? `data:image/jpeg;base64,${arrayBufferToBase64(result.data.Imagen)}` : UserImg
+        });
+        
+        setLoading(false);
+        console.log(result.data.Imagen);
+
+
+      } catch (err) {
+        console.log(err.message);
+        setLoading(false);
+      }
+    };
+    
+    fetchUserData();
+  }, []);
+
+  const arrayBufferToBase64 = (buffer) => {
+    if (buffer && buffer.type === "Buffer" && Array.isArray(buffer.data)) {
+      const bytes = new Uint8Array(buffer.data);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    }
+    else if (buffer instanceof ArrayBuffer || buffer instanceof Uint8Array) {
+      const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    }
+    else if (typeof buffer === 'string') {
+      return buffer;
+    }
+    return null;
+  };
+
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -37,10 +119,15 @@ export default function PerfilUsuario() {
     setShowEditModal(true);
   };
 
-  const handleSaveChanges = () => {
-    setUserData({...editData});
-    setShowEditModal(false);
-    // Aqui van los datos para la API
+  const handleSaveChanges = async () => {
+    try {
+      // Aquí iría la lógica para actualizar los datos en el backend
+      // Por ahora solo actualizamos el estado local
+      setUserData({...editData});
+      setShowEditModal(false);
+    } catch (err) {
+      console.error('Error al guardar cambios:', err);
+    }
   };
 
   const handleImageChange = (e) => {
@@ -59,14 +146,24 @@ export default function PerfilUsuario() {
     return new Date(dateString).toLocaleDateString('es-ES', options);
   };
 
-
   const handleLogin = () => {
-      setIsLoggedIn(true);
-      navigate('/login');
+    setIsLoggedIn(true);
+    navigate('/login');
   };
-  
 
-return (
+  
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Spinner animation="border" variant="warning" />
+      </div>
+    );
+  }
+
+  console.log("Imagen procesada:", userData.Imagen);
+
+  
+  return (
     <div className="user-profile">
       <nav className='navbar navbar-expand-lg navbar-dark bg-dark py-3'>
             <Container>
@@ -156,26 +253,15 @@ return (
         <div className="user-profile-card">
           <div className="profile-header">
             <div className="avatar-container">
-              <Image 
-                src={userData.Imagen} 
-                roundedCircle 
-                className="profile-avatar"
-              />
-              <Button 
-                variant="outline-light" 
-                size="sm" 
-                className="edit-avatar-btn"
-                onClick={() => document.getElementById('imageUpload').click()}
-              >
-                <FaEdit />
-              </Button>
-              <input
-                type="file"
-                id="imageUpload"
-                accept="image/*"
-                style={{display: 'none'}}
-                onChange={handleImageChange}
-              />
+            <Image 
+              src={userData.Imagen} 
+              roundedCircle 
+              className="profile-avatar"
+              onError={(e) => {
+                console.error('Error cargando imagen:', e);
+                e.target.src = UserImg;
+              }}
+            />
             </div>
             <h2 className="profile-username">{userData.Nombre}</h2>
             <Button 
@@ -219,14 +305,7 @@ return (
             
             <div className="detail-item bio-item">
               <span className="detail-label">📝 Descripción:</span>
-              <p className="detail-value bio-text">{userData.Descripción || "No hay descripción"}</p>
-            </div>
-            
-            <div className="detail-item">
-              <span className="detail-label">🔘 Estatus:</span>
-              <Badge bg={userData.Estatus ? "success" : "secondary"}>
-                {userData.Estatus ? "Activo" : "Inactivo"}
-              </Badge>
+              <p className="detail-value bio-text">{userData.Descripción}</p>
             </div>
           </div>
 
@@ -238,11 +317,12 @@ return (
             >
               Ver Mis Listas
             </Button>
+          
           </div>
         </div>
       </Container>
 
-
+      {/* Modal de Edición */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered className="dark-modal">
         <Modal.Header closeButton>
           <Modal.Title>Editar Perfil</Modal.Title>
@@ -273,6 +353,15 @@ return (
                 type="date" 
                 value={editData.Fecha_Nac}
                 onChange={(e) => setEditData({...editData, Fecha_Nac: e.target.value})}
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Contraseña</Form.Label>
+              <Form.Control 
+                type="password" 
+                value={editData.Contraseña}
+                onChange={(e) => setEditData({...editData, Contraseña: e.target.value})}
               />
             </Form.Group>
             

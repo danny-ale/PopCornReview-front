@@ -24,7 +24,6 @@ const movieData = {
 
 export default function MovieDetail() {
   const { userId, movieId } = useParams();
-  console.log(`User ID: ${userId}, Movie ID: ${movieId}`);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
   const [review, setReview] = useState({ rating: 0, comment: '', liked: null });
@@ -362,6 +361,8 @@ export default function MovieDetail() {
     }
   };
 
+
+  
   return (
     <div className="body-home">
        <div className="d-flex flex-row">
