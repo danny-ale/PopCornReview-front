@@ -46,6 +46,31 @@ export default function PerfilUsuario() {
         
         const result = await response.json();
         
+        const getImageUrl = (imageData) => {
+          if (!imageData) return UserImg;
+          
+          if (imageData.type === "Buffer" && Array.isArray(imageData.data)) {  
+            const chunkSize = 65536; 
+            const chunks = [];
+            
+            for (let i = 0; i < imageData.data.length; i += chunkSize) {
+              const chunk = imageData.data.slice(i, i + chunkSize);
+              chunks.push(String.fromCharCode.apply(null, chunk));
+            }
+            
+            const base64String = chunks.join('');
+            return `data:image/jpeg;base64,${base64String}`;
+          }
+          
+          if (typeof imageData === 'string') {
+            if (imageData.startsWith('data:image')) {
+              return imageData;
+            }
+            return `data:image/jpeg;base64,${imageData}`;
+          }
+          
+          return UserImg;
+        };
         
         setUserData({
           Id: result.data.Id,
@@ -54,7 +79,7 @@ export default function PerfilUsuario() {
           Fecha_Nac: result.data.Fecha_Nac.split('T')[0], 
           Descripción: result.data.Descripción || "No hay descripción",
           Contraseña: result.data.Contraseña,
-          Imagen: result.data.Imagen ? `data:image/jpeg;base64,${arrayBufferToBase64(result.data.Imagen)}` : UserImg
+          Imagen: getImageUrl(result.data.Imagen)
         });
         
         setEditData({
@@ -64,12 +89,12 @@ export default function PerfilUsuario() {
           Fecha_Nac: result.data.Fecha_Nac.split('T')[0],
           Descripción: result.data.Descripción || "",
           Contraseña: result.data.Contraseña,
-          Imagen: result.data.Imagen ? `data:image/jpeg;base64,${arrayBufferToBase64(result.data.Imagen)}` : UserImg
+          Imagen: getImageUrl(result.data.Imagen)
         });
         
         setLoading(false);
         console.log(result.data.Imagen);
-
+        console.log("Imagen Array:", getImageUrl(result.data.Imagen));
 
       } catch (err) {
         console.log(err.message);
@@ -79,29 +104,6 @@ export default function PerfilUsuario() {
     
     fetchUserData();
   }, []);
-
-  const arrayBufferToBase64 = (buffer) => {
-    if (buffer && buffer.type === "Buffer" && Array.isArray(buffer.data)) {
-      const bytes = new Uint8Array(buffer.data);
-      let binary = '';
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return window.btoa(binary);
-    }
-    else if (buffer instanceof ArrayBuffer || buffer instanceof Uint8Array) {
-      const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
-      let binary = '';
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return window.btoa(binary);
-    }
-    else if (typeof buffer === 'string') {
-      return buffer;
-    }
-    return null;
-  };
 
 
   const handleSearchSubmit = (e) => {
