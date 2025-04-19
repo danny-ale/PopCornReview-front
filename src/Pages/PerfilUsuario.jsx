@@ -4,6 +4,9 @@ import { Container, Button, Form, Dropdown, NavDropdown, Image, Modal, Spinner }
 import { FaSearch, FaUser, FaTags, FaFilm, FaSignOutAlt, FaEdit, FaCalendarAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Logo2 from '../Images/Logooo.jpg';
 import UserImg from '../Images/usuario.jpg';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Bounce } from "react-toastify";
 import '../css/PerfilUsuario.css';
 
 export default function PerfilUsuario() {
@@ -13,6 +16,8 @@ export default function PerfilUsuario() {
   const [showPassword, setShowPassword] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [errors, setErrors] = useState({});
+  const [originalData, setOriginalData] = useState({});
   const [userData, setUserData] = useState({
     Id: null,
     Nombre: "",
@@ -24,84 +29,84 @@ export default function PerfilUsuario() {
   });
   const [editData, setEditData] = useState({...userData});
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-    
-        const userDataLS = JSON.parse(localStorage.getItem('userData'));
-        const userId = userDataLS?.userId;
-        const token = localStorage.getItem('token');
-        const headers = {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        };
+  const fetchUserData = async () => {
+    try {
+  
+      const userDataLS = JSON.parse(localStorage.getItem('userData'));
+      const userId = userDataLS?.userId;
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
 
-        const response = await fetch(
-          `http://localhost:3001/popCornReview/getInfo/${userId}`,
-          { headers }
-        );
-        if (!response.ok) {
-          throw new Error('Error al obtener los datos del usuario');
+      const response = await fetch(
+        `http://localhost:3001/popCornReview/getInfo/${userId}`,
+        { headers }
+      );
+      if (!response.ok) {
+        throw new Error('Error al obtener los datos del usuario');
+      }
+      
+      const result = await response.json();
+      
+      const getImageUrl = (imageData) => {
+        if (!imageData) return UserImg;
+        
+        if (imageData.type === "Buffer" && Array.isArray(imageData.data)) {  
+          const chunkSize = 65536; 
+          const chunks = [];
+          
+          for (let i = 0; i < imageData.data.length; i += chunkSize) {
+            const chunk = imageData.data.slice(i, i + chunkSize);
+            chunks.push(String.fromCharCode.apply(null, chunk));
+          }
+          
+          const base64String = chunks.join('');
+          return `data:image/jpeg;base64,${base64String}`;
         }
         
-        const result = await response.json();
-        
-        const getImageUrl = (imageData) => {
-          if (!imageData) return UserImg;
-          
-          if (imageData.type === "Buffer" && Array.isArray(imageData.data)) {  
-            const chunkSize = 65536; 
-            const chunks = [];
-            
-            for (let i = 0; i < imageData.data.length; i += chunkSize) {
-              const chunk = imageData.data.slice(i, i + chunkSize);
-              chunks.push(String.fromCharCode.apply(null, chunk));
-            }
-            
-            const base64String = chunks.join('');
-            return `data:image/jpeg;base64,${base64String}`;
+        if (typeof imageData === 'string') {
+          if (imageData.startsWith('data:image')) {
+            return imageData;
           }
-          
-          if (typeof imageData === 'string') {
-            if (imageData.startsWith('data:image')) {
-              return imageData;
-            }
-            return `data:image/jpeg;base64,${imageData}`;
-          }
-          
-          return UserImg;
-        };
+          return `data:image/jpeg;base64,${imageData}`;
+        }
         
-        setUserData({
-          Id: result.data.Id,
-          Nombre: result.data.Nombre,
-          Correo: result.data.Correo,
-          Fecha_Nac: result.data.Fecha_Nac.split('T')[0], 
-          Descripción: result.data.Descripción || "No hay descripción",
-          Contraseña: result.data.Contraseña,
-          Imagen: getImageUrl(result.data.Imagen)
-        });
-        
-        setEditData({
-          Id: result.data.Id,
-          Nombre: result.data.Nombre,
-          Correo: result.data.Correo,
-          Fecha_Nac: result.data.Fecha_Nac.split('T')[0],
-          Descripción: result.data.Descripción || "",
-          Contraseña: result.data.Contraseña,
-          Imagen: getImageUrl(result.data.Imagen)
-        });
-        
-        setLoading(false);
-        console.log(result.data.Imagen);
-        console.log("Imagen Array:", getImageUrl(result.data.Imagen));
+        return UserImg;
+      };
+      
+      setUserData({
+        Id: result.data.Id,
+        Nombre: result.data.Nombre,
+        Correo: result.data.Correo,
+        Fecha_Nac: result.data.Fecha_Nac.split('T')[0], 
+        Descripción: result.data.Descripción || "No hay descripción",
+        Contraseña: result.data.Contraseña,
+        Imagen: getImageUrl(result.data.Imagen)
+      });
+      
+      setEditData({
+        Id: result.data.Id,
+        Nombre: result.data.Nombre,
+        Correo: result.data.Correo,
+        Fecha_Nac: result.data.Fecha_Nac.split('T')[0],
+        Descripción: result.data.Descripción || "",
+        Contraseña: result.data.Contraseña,
+        Imagen: getImageUrl(result.data.Imagen)
+      });
+      
+      setLoading(false);
+      console.log(result.data.Imagen);
+      console.log("Imagen Array:", getImageUrl(result.data.Imagen));
 
-      } catch (err) {
-        console.log(err.message);
-        setLoading(false);
-      }
-    };
-    
+    } catch (err) {
+      console.log(err.message);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUserData();
   }, []);
 
@@ -117,18 +122,93 @@ export default function PerfilUsuario() {
   };
 
   const handleEditProfile = () => {
-    setEditData({...userData});
+    setEditData({
+      Nombre: userData.Nombre,
+      Correo: userData.Correo,
+      Fecha_Nac: userData.Fecha_Nac, 
+      Descripción: userData.Descripción,
+      imagenOriginal: userData.Imagen 
+    });
+    setOriginalData({
+      Nombre: userData.Nombre,
+      Correo: userData.Correo,
+      Fecha_Nac: userData.Fecha_Nac,
+      Descripción: userData.Descripción
+    });
     setShowEditModal(true);
   };
 
   const handleSaveChanges = async () => {
+    if (!validateEditForm()) return;
+  
     try {
-      // Aquí iría la lógica para actualizar los datos en el backend
-      // Por ahora solo actualizamos el estado local
-      setUserData({...editData});
-      setShowEditModal(false);
-    } catch (err) {
-      console.error('Error al guardar cambios:', err);
+
+      const dataToSend = {
+        userId: userData.Id, 
+        nombre: editData.Nombre || originalData.Nombre,
+        correo: editData.Correo || originalData.Correo,
+        fecha_nac: editData.Fecha_Nac || originalData.Fecha_Nac,
+        contrasena: editData.Contraseña || undefined, 
+        descripcion: editData.Descripción || originalData.Descripción,
+        imagen: editData.newImage || undefined 
+      };
+  
+      Object.keys(dataToSend).forEach(key => {
+        if (dataToSend[key] === undefined) {
+          delete dataToSend[key];
+        }
+      });
+  
+      const response = await fetch('http://localhost:3001/popCornReview/updateUser', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(dataToSend)
+      });
+  
+      const result = await response.json();
+  
+      if (result.success) {
+        toast.success('Perfil actualizado correctamente', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
+        
+        const updatedUserData = {
+          email: dataToSend.correo || userData.email,
+          name: dataToSend.nombre || userData.name,
+          userId:  dataToSend.userId 
+        };
+        
+        localStorage.setItem('userData', JSON.stringify(updatedUserData));
+        await fetchUserData();
+        setShowEditModal(false);
+        
+      } else {
+        throw new Error(result.message || 'Error al actualizar el perfil');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(error.message || 'Error al actualizar el perfil', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
     }
   };
 
@@ -137,7 +217,10 @@ export default function PerfilUsuario() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setEditData({...editData, Imagen: reader.result});
+        setEditData({
+          ...editData,
+          newImage: reader.result.split(',')[1] 
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -153,6 +236,43 @@ export default function PerfilUsuario() {
     navigate('/login');
   };
 
+
+  const validateEditForm = () => {
+    let valid = true;
+    const newErrors = {};
+  
+    // Validación del nombre
+    if (editData.Nombre && !/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(editData.Nombre.trim())) {
+      newErrors.Nombre = "El nombre solo debe contener letras y espacios.";
+      valid = false;
+    }
+  
+    // Validación del correo
+    if (editData.Correo && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(editData.Correo.trim())) {
+      newErrors.Correo = "El correo electrónico no es válido.";
+      valid = false;
+    }
+  
+    // Validación de la contraseña (solo si se proporciona una nueva)
+    if (editData.Contraseña && !/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(editData.Contraseña)) {
+      newErrors.Contraseña = "La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial.";
+      valid = false;
+    }
+  
+    // Validación de fecha de nacimiento
+    if (editData.Fecha_Nac) {
+      const currentDate = new Date();
+      const birthDate = new Date(editData.Fecha_Nac);
+      if (birthDate > currentDate) {
+        newErrors.Fecha_Nac = "La fecha de nacimiento no puede ser futura.";
+        valid = false;
+      }
+    }
+  
+    setErrors(newErrors);
+    return valid;
+  };
+  
   
   if (loading) {
     return (
@@ -335,36 +455,53 @@ export default function PerfilUsuario() {
               <Form.Label>Nombre</Form.Label>
               <Form.Control 
                 type="text" 
-                value={editData.Nombre}
+                value={editData.Nombre || ''}
                 onChange={(e) => setEditData({...editData, Nombre: e.target.value})}
+                isInvalid={!!errors.Nombre}
               />
+              <Form.Control.Feedback type="invalid">
+                {errors.Nombre}
+              </Form.Control.Feedback>
             </Form.Group>
             
             <Form.Group className="mb-3">
               <Form.Label>Correo Electrónico</Form.Label>
               <Form.Control 
                 type="email" 
-                value={editData.Correo}
+                value={editData.Correo || ''}
                 onChange={(e) => setEditData({...editData, Correo: e.target.value})}
+                isInvalid={!!errors.Correo}
               />
+              <Form.Control.Feedback type="invalid">
+                {errors.Correo}
+              </Form.Control.Feedback>
             </Form.Group>
             
             <Form.Group className="mb-3">
               <Form.Label>Fecha de Nacimiento</Form.Label>
               <Form.Control 
                 type="date" 
-                value={editData.Fecha_Nac}
+                value={editData.Fecha_Nac || ''}
                 onChange={(e) => setEditData({...editData, Fecha_Nac: e.target.value})}
+                isInvalid={!!errors.Fecha_Nac}
               />
+              <Form.Control.Feedback type="invalid">
+                {errors.Fecha_Nac}
+              </Form.Control.Feedback>
             </Form.Group>
             
             <Form.Group className="mb-3">
-              <Form.Label>Contraseña</Form.Label>
+              <Form.Label>Contraseña (dejar vacío para no cambiar)</Form.Label>
               <Form.Control 
                 type="password" 
-                value={editData.Contraseña}
+                placeholder="Nueva contraseña"
+                value={editData.Contraseña || ''}
                 onChange={(e) => setEditData({...editData, Contraseña: e.target.value})}
+                isInvalid={!!errors.Contraseña}
               />
+              <Form.Control.Feedback type="invalid">
+                {errors.Contraseña}
+              </Form.Control.Feedback>
             </Form.Group>
             
             <Form.Group className="mb-3">
@@ -372,18 +509,28 @@ export default function PerfilUsuario() {
               <Form.Control 
                 as="textarea" 
                 rows={3}
-                value={editData.Descripción}
+                value={editData.Descripción || ''}
                 onChange={(e) => setEditData({...editData, Descripción: e.target.value})}
               />
             </Form.Group>
             
             <Form.Group className="mb-3">
-              <Form.Label>Cambiar Imagen</Form.Label>
+              <Form.Label>Cambiar Imagen (opcional)</Form.Label>
               <Form.Control 
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
               />
+              {editData.imagenOriginal && !editData.newImage && (
+                <div className="mt-2">
+                  <p className="small text-muted">Imagen actual:</p>
+                  <img 
+                    src={editData.imagenOriginal} 
+                    alt="Perfil actual" 
+                    style={{maxWidth: '100px', maxHeight: '100px'}}
+                  />
+                </div>
+              )}
             </Form.Group>
           </Form>
         </Modal.Body>
