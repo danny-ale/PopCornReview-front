@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../css/ListaReview.css';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
@@ -9,126 +9,156 @@ import CustomCategoriesSection from '../Components/List_AddCategories';
 import FavoritesSection from '../Components/List_AddFavoritesMovies';
 import ReviewsSection from '../Components/List_ReviewMovies';
 
-
-
 export default function ListaReview() {
     const navigate = useNavigate();
     const [editingReview, setEditingReview] = useState(null);
     const [editedReviewText, setEditedReviewText] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    const userId = userData?.userId;
+    const userName = userData?.name ; 
+    
 
     const [lists, setLists] = useState({
-        favorites: [
-            {
-                id: 1,
-                title: "El Padrino",
-                year: 1972,
-                rating: "R",
-                director: "Francis Ford Coppola",
-                poster: 'https://es.web.img3.acsta.net/pictures/18/06/12/12/12/0117051.jpg?coixp=49&coiyp=27',
-                genres: ["Drama", "Crimen"],
-                runtime: 175,
-                userRating: 5,
-                addedDate: "2023-01-15"
-            },
-            {
-                id: 2,
-                title: "Parásitos",
-                year: 2019,
-                rating: "R",
-                director: "Bong Joon-ho",
-                poster: 'https://m.media-amazon.com/images/S/pv-target-images/2fee9e617ca8af2eed8123c2686040bc355cad4c5ef7d5f4644e9e2bb39d2192.jpg',
-                genres: ["Drama", "Thriller"],
-                runtime: 132,
-                userRating: 4.5,
-                addedDate: "2023-03-22"
-            }
-        ],
-        reviews: [
-            {
-                id: 3,
-                title: "El Caballero de la Noche",
-                year: 2008,
-                rating: "PG-13",
-                director: "Christopher Nolan",
-                poster: 'https://th.bing.com/th/id/OIP.tTkuHiYFE-EZlz1f2smSwAAAAA?rs=1&pid=ImgDetMain',
-                genres: ["Acción", "Drama", "Thriller"],
-                runtime: 152,
-                review: "Una obra maestra del cine de superhéroes. Heath Ledger ofrece una actuación icónica como el Joker.",
-                userRating: 5,
-                reviewDate: "2023-05-15"
-            },
-            {
-                id: 4,
-                title: "Dune",
-                year: 2021,
-                rating: "PG-13",
-                director: "Denis Villeneuve",
-                poster: 'https://th.bing.com/th/id/OIP.u60xVWa9YE6ffmHnm3b8FQHaJQ?rs=1&pid=ImgDetMain',
-                genres: ["Ciencia ficción", "Aventura"],
-                runtime: 155,
-                review: "Impresionante visualmente pero algo lenta en su narrativa. Espero que la segunda parte complete la historia satisfactoriamente.",
-                userRating: 4,
-                reviewDate: "2023-02-10"
-            }
-        ],
-        addedMovies: [
-            {
-                id: 5,
-                title: "Everything Everywhere All at Once",
-                year: 2022,
-                rating: "R",
-                director: "Daniel Kwan, Daniel Scheinert",
-                poster: 'https://assets.dev-filo.dift.io/img/2022/05/11/stqawbsabzh5zoisnevtras7ui.jpeg_344325628.jpeg',
-                genres: ["Ciencia ficción", "Aventura", "Comedia"],
-                runtime: 139,
-                addedDate: "2023-04-10",
-                contributors: 12,
-                isPublic: true
-            },
-            {
-                id: 6,
-                title: "El Proyecto de la Bruja de Blair",
-                year: 1999,
-                rating: "R",
-                director: "Daniel Myrick, Eduardo Sánchez",
-                poster: 'https://th.bing.com/th/id/R.a8594e1573779e8b94e264cc44e93e07?rik=x%2bDHMzoJvOnYLw&pid=ImgRaw&r=0',
-                genres: ["Terror", "Found footage"],
-                runtime: 81,
-                addedDate: "2023-02-28",
-                contributors: 5,
-                isPublic: false
-            }
-        ],
-        customCategories: [
-            {
-                id: 1,
-                name: "Acción",
-                description: "Películas llenas de acción y emoción",
-                movieCount: 24,
-                createdDate: "2022-11-05",
-                isPublic: true,
-                followers: 156
-            },
-            {
-                id: 2,
-                name: "Comedia",
-                description: "Películas para reír y pasar un buen rato",
-                movieCount: 18,
-                createdDate: "2023-01-18",
-                isPublic: true,
-                followers: 89
-            },
-            {
-                id: 3,
-                name: "Occidental",
-                description: "Clásicos del western y nuevas interpretaciones",
-                movieCount: 42,
-                createdDate: "2022-09-30",
-                isPublic: false,
-                followers: 0
-            }
-        ]
+        favorites: [],
+        reviews: [],
+        addedMovies: [],
+        customCategories: []
     });
+
+
+    const processImage = (bufferData) => {
+        if (!bufferData || !bufferData.data) return null;
+        try {
+            const base64String = btoa(
+                String.fromCharCode(...new Uint8Array(bufferData.data))
+            );
+            return `data:image/jpeg;base64,${base64String}`;
+        } catch (error) {
+            console.error("Error processing image:", error);
+            return null;
+        }
+    };
+
+
+    const fetchData = async () => {
+        if (!userId) {
+            setError('Usuario no identificado');
+            setLoading(false);
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError('No hay token de autenticación');
+            setLoading(false);
+            return;
+        }
+
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+
+        try {
+            setLoading(true);
+            
+
+            const moviesResponse = await fetch(
+                `http://localhost:3001/popCornReview/getMovies/${userId}`,
+                { headers }
+            );
+            const moviesData = await moviesResponse.json();
+            
+
+            const categoriesResponse = await fetch(
+                `http://localhost:3001/popCornReview/getCategories/${userId}`,
+                { headers }
+            );
+            const categoriesData = await categoriesResponse.json();
+            
+  
+            const favoritesResponse = await fetch(
+                `http://localhost:3001/popCornReview/getFavorites/${userId}`,
+                { headers }
+            );
+            const favoritesData = await favoritesResponse.json();
+            
+
+            const reviewsResponse = await fetch(
+                `http://localhost:3001/popCornReview/getReviews/${userId}`,
+                { headers }
+            );
+            const reviewsData = await reviewsResponse.json();
+
+
+            setLists({
+                addedMovies: moviesData.data?.map(movie => ({
+                    id: movie.Id,
+                    title: movie.Titulo,
+                    year: movie.Año_Lanzamiento,
+                    rating: movie.Clasificación,
+                    director: movie.Director,
+                    poster: processImage(movie.Portada),
+                    genres: [movie.Id_categoria], // Aquí podrías mapear el ID a nombre de categoría
+                    runtime: movie.Duración_Min,
+                    addedDate: new Date().toISOString(), // No viene en el endpoint, usar fecha actual
+                    contributors: 1, // Valor por defecto
+                    isPublic: true // Valor por defecto
+                })) || [],
+                
+                customCategories: categoriesData.data?.map(category => ({
+                    id: category.Id,
+                    name: category.Nombre,
+                    description: category.Descripcion,
+                    movieCount: 0, // No viene en el endpoint, podrías contar películas por categoría
+                    createdDate: new Date().toISOString(), // No viene en el endpoint
+                    isPublic: true, // Valor por defecto
+                    followers: 0 // Valor por defecto
+                })) || [],
+                
+                favorites: favoritesData.data?.map(fav => ({
+                    id: fav.Id,
+                    title: fav.Titulo,
+                    year: fav.Año_Lanzamiento,
+                    rating: fav.Clasificación,
+                    director: fav.Director,
+                    poster: processImage(fav.Portada),
+                    genres: [fav.Id_categoria], // Mapear ID a nombre de categoría
+                    runtime: fav.Duración_Min,
+                    userRating: fav.Puntuacion_Media ? parseFloat(fav.Puntuacion_Media) : null,
+                    addedDate: new Date().toISOString() // No viene en el endpoint
+                })) || [],
+                
+                reviews: reviewsData.data?.map(review => ({
+                    id: review.Id,
+                    title: review.Titulo,
+                    year: review.Año_Lanzamiento,
+                    rating: review.Clasificación,
+                    director: review.Director,
+                    poster: processImage(review.Portada),
+                    genres: [], // No viene en el endpoint
+                    runtime: review.Duración_Min,
+                    review: review.Contenido,
+                    userRating: review.Calificación,
+                    reviewDate: review.Fecha
+                })) || []
+            });
+            
+            setLoading(false);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            setError("Error al cargar los datos del usuario");
+            setLoading(false);
+        }
+    };
+
+    // Cargar datos al montar el componente
+    useEffect(() => {
+        fetchData();
+    }, [userId]);
 
     const renderStars = (rating) => {
         const stars = [];
@@ -149,11 +179,12 @@ export default function ListaReview() {
     };
 
     const formatDate = (dateString) => {
+        if (!dateString) return 'Fecha no disponible';
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
-    const handleDelete = (listType, id) => {
+    const handleDelete = async (listType, id) => {
         Swal.fire({
             title: '¿Estás seguro?',
             text: "¡No podrás revertir esto!",
@@ -163,17 +194,28 @@ export default function ListaReview() {
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                setLists(prev => ({
-                    ...prev,
-                    [listType]: prev[listType].filter(item => item.id !== id)
-                }));
-                Swal.fire(
-                    '¡Eliminado!',
-                    'El elemento ha sido eliminado.',
-                    'success'
-                );
+                try {
+                    // Aquí deberías implementar la llamada al endpoint de eliminación
+                    // Por ahora solo actualizamos el estado local
+                    setLists(prev => ({
+                        ...prev,
+                        [listType]: prev[listType].filter(item => item.id !== id)
+                    }));
+                    
+                    Swal.fire(
+                        '¡Eliminado!',
+                        'El elemento ha sido eliminado.',
+                        'success'
+                    );
+                } catch (error) {
+                    Swal.fire(
+                        'Error',
+                        'No se pudo eliminar el elemento',
+                        'error'
+                    );
+                }
             }
         });
     };
@@ -183,15 +225,22 @@ export default function ListaReview() {
         setEditedReviewText(review.review);
     };
 
-    const saveEditedReview = (id) => {
-        setLists(prev => ({
-            ...prev,
-            reviews: prev.reviews.map(review => 
-                review.id === id ? { ...review, review: editedReviewText } : review
-            )
-        }));
-        setEditingReview(null);
-        Swal.fire('¡Guardado!', 'Tu reseña ha sido actualizada.', 'success');
+    const saveEditedReview = async (id) => {
+        try {
+            // Aquí deberías implementar la llamada al endpoint de actualización
+            // Por ahora solo actualizamos el estado local
+            setLists(prev => ({
+                ...prev,
+                reviews: prev.reviews.map(review => 
+                    review.id === id ? { ...review, review: editedReviewText } : review
+                )
+            }));
+            
+            setEditingReview(null);
+            Swal.fire('¡Guardado!', 'Tu reseña ha sido actualizada.', 'success');
+        } catch (error) {
+            Swal.fire('Error', 'No se pudo actualizar la reseña', 'error');
+        }
     };
 
     const handleEditMovie = (movie) => {
@@ -210,20 +259,27 @@ export default function ListaReview() {
                     year: document.getElementById('swal-year').value
                 };
             }
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                setLists(prev => ({
-                    ...prev,
-                    addedMovies: prev.addedMovies.map(m => 
-                        m.id === movie.id ? { 
-                            ...m, 
-                            title: result.value.title,
-                            director: result.value.director,
-                            year: result.value.year
-                        } : m
-                    )
-                }));
-                Swal.fire('¡Actualizado!', 'La película ha sido editada.', 'success');
+                try {
+                    // Aquí deberías implementar la llamada al endpoint de actualización
+                    // Por ahora solo actualizamos el estado local
+                    setLists(prev => ({
+                        ...prev,
+                        addedMovies: prev.addedMovies.map(m => 
+                            m.id === movie.id ? { 
+                                ...m, 
+                                title: result.value.title,
+                                director: result.value.director,
+                                year: result.value.year
+                            } : m
+                        )
+                    }));
+                    
+                    Swal.fire('¡Actualizado!', 'La película ha sido editada.', 'success');
+                } catch (error) {
+                    Swal.fire('Error', 'No se pudo actualizar la película', 'error');
+                }
             }
         });
     };
@@ -242,19 +298,26 @@ export default function ListaReview() {
                     description: document.getElementById('swal-description').value
                 };
             }
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                setLists(prev => ({
-                    ...prev,
-                    customCategories: prev.customCategories.map(c => 
-                        c.id === category.id ? { 
-                            ...c, 
-                            name: result.value.name,
-                            description: result.value.description
-                        } : c
-                    )
-                }));
-                Swal.fire('¡Actualizado!', 'La categoría ha sido editada.', 'success');
+                try {
+                    // Aquí deberías implementar la llamada al endpoint de actualización
+                    // Por ahora solo actualizamos el estado local
+                    setLists(prev => ({
+                        ...prev,
+                        customCategories: prev.customCategories.map(c => 
+                            c.id === category.id ? { 
+                                ...c, 
+                                name: result.value.name,
+                                description: result.value.description
+                            } : c
+                        )
+                    }));
+                    
+                    Swal.fire('¡Actualizado!', 'La categoría ha sido editada.', 'success');
+                } catch (error) {
+                    Swal.fire('Error', 'No se pudo actualizar la categoría', 'error');
+                }
             }
         });
     };
@@ -263,23 +326,41 @@ export default function ListaReview() {
         navigate(-1);
     };
 
-return (
-    <div className="d-flex flex-row">
-        <div className='py-5 px-4'>
-            <Button variant="light" onClick={handleBack} className="w-2">
-                <FaArrowLeft className="me-2" /> Volver 
-            </Button>
-        </div>
-        <div className="user-reviews-page">
-            <header className="user-header">
-                <h1>Perfil de UsuarioEjemplo</h1>
-                <div className="user-stats">
+    if (loading) {
+        return (
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="alert alert-danger">{error}</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="d-flex flex-row">
+            <div className='py-5 px-4'>
+                <Button variant="light" onClick={handleBack} className="w-2">
+                    <FaArrowLeft className="me-2" /> Volver 
+                </Button>
+            </div>
+            <div className="user-reviews-page">
+                <header className="user-header">
+                    <h1>Perfil de {userName}</h1>
+                    <div className="user-stats">
                         <span><FaList /> {lists.addedMovies.length} Agregadas</span>
                         <span><FaEdit /> {lists.reviews.length} Reseñas</span>
                         <span><FaHeart /> {lists.favorites.length} Favoritos</span>
                         <span><FaFolder /> {lists.customCategories.length} Categorías</span>
-                </div>
-            </header>     
+                    </div>
+                </header>     
                 <div className="lists-container">
                     <AddedMoviesSection 
                         movies={lists.addedMovies}
@@ -314,7 +395,7 @@ return (
                         onDeleteReview={handleDelete}
                     />
                 </div>
+            </div>
         </div>
-    </div>
-);
+    );
 };
