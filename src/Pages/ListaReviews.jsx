@@ -3,11 +3,13 @@ import '../css/ListaReview.css';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import { FaStar, FaRegStar, FaStarHalfAlt, FaHeart, FaArrowLeft, FaEdit, FaFolder, FaList } from 'react-icons/fa';
+import { MdOutlineComment } from "react-icons/md";
 import Swal from 'sweetalert2';
 import AddedMoviesSection from '../Components/List_AddMovies';
 import CustomCategoriesSection from '../Components/List_AddCategories';
 import FavoritesSection from '../Components/List_AddFavoritesMovies';
 import ReviewsSection from '../Components/List_ReviewMovies';
+import CommentSection from '../Components/List_CommentMovies';
 
 export default function ListaReview() {
     const navigate = useNavigate();
@@ -26,6 +28,7 @@ export default function ListaReview() {
     const [lists, setLists] = useState({
         favorites: [],
         reviews: [],
+        comment:[],
         addedMovies: [],
         customCategories: []
     });
@@ -135,6 +138,13 @@ export default function ListaReview() {
             const reviewsData = await reviewsResponse.json();
 
 
+            const commentsResponse = await fetch(
+                `http://localhost:3001/popCornReview/getComments/${userId}`,
+                { headers }
+            );
+            const commentsData = await commentsResponse.json();
+
+
             setLists({
                 addedMovies: moviesData.data?.map(movie => ({
                     id: movie.Id,
@@ -185,6 +195,13 @@ export default function ListaReview() {
                     review: review.Contenido,
                     userRating: review.Calificación,
                     reviewDate: review.Fecha
+                })) || [],
+
+                comment: commentsData.data?.map(review => ({
+                    id: review.Id,
+                    userName: review.Nombre_Usuario,
+                    reviewDate: review.Fecha,
+                    review: review.Contenido
                 })) || []
             });
             
@@ -496,6 +513,7 @@ export default function ListaReview() {
                         <span><FaEdit /> {lists.reviews.length} Reseñas</span>
                         <span><FaHeart /> {lists.favorites.length} Favoritos</span>
                         <span><FaFolder /> {lists.customCategories.length} Categorías</span>
+                        <span><MdOutlineComment /> {lists.comment.length} Comentarios</span>
                     </div>
                 </header>     
                 <div className="lists-container">
@@ -530,6 +548,12 @@ export default function ListaReview() {
                             Swal.fire('¡Guardado!', 'Tu reseña ha sido actualizada.', 'success');
                         }}
                         onDeleteReview={handleDelete}
+                    />
+
+
+                    <CommentSection 
+                        comment={lists.comment}
+                        onDeleteComment={handleDelete}
                     />
                 </div>
             </div>

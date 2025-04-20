@@ -501,6 +501,39 @@
 }
 
 
+.comment-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+  }
+  
+  .comment-id {
+    font-weight: bold;
+  }
+  
+  .comment-user {
+    font-style: italic;
+    font-weight: bold;
+    font-size: large;
+  }
+  
+  .comment-date {
+    color: var(--text-secondary);
+  }
+  
+  .comment-content {
+    margin: 15px 0;
+    line-height: 1.6;
+  }
+  
+
+
+
+
 @media (max-width: 768px) {
     .category-actions {
         flex-direction: column;
