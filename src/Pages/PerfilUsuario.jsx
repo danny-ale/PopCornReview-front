@@ -282,8 +282,6 @@ export default function PerfilUsuario() {
     );
   }
 
-  console.log("Imagen procesada:", userData.Imagen);
-
   
   return (
     <div className="user-profile">

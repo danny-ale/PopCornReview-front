@@ -213,36 +213,53 @@ export default function ListaReview() {
         }
     };
 
-    // Cargar datos al montar el componente
     useEffect(() => {
         fetchData();
     }, [userId]);
 
-    const renderStars = (rating) => {
-        const stars = [];
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating % 1 !== 0;
-        
-        for (let i = 1; i <= 5; i++) {
-            if (i <= fullStars) {
-                stars.push(<FaStar key={i} className="star filled" />);
-            } else if (i === fullStars + 1 && hasHalfStar) {
-                stars.push(<FaStarHalfAlt key={i} className="star half-filled" />);
-            } else {
-                stars.push(<FaRegStar key={i} className="star" />);
-            }
-        }
-        
-        return stars;
-    };
-
-    const formatDate = (dateString) => {
-        if (!dateString) return 'Fecha no disponible';
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-    };
 
     const handleDelete = async (listType, id) => {
+        let endpoint = '';
+        let method = 'PUT'; 
+        let bodyData = null;
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        const userId = userData?.userId;
+        let isReview=false;
+    
+        switch(listType) {
+            case 'addedMovies':
+                endpoint = 'http://localhost:3001/popCornReview/delete/movie';
+                method = 'PUT';
+                bodyData = { id };
+                break;
+            case 'customCategories':
+                endpoint = 'http://localhost:3001/popCornReview/delete/categorie';
+                method = 'PUT';
+                bodyData = { id };
+                break;
+            case 'reviews':
+                endpoint = 'http://localhost:3001/popCornReview/delete/review';
+                method = 'DELETE';
+                bodyData = { id };
+                isReview=true;
+                break;
+            case 'comment':
+                endpoint = 'http://localhost:3001/popCornReview/delete/comment';
+                method = 'DELETE';
+                bodyData = { id };
+                break;
+            case 'favorites':
+                endpoint = 'http://localhost:3001/popCornReview/remove/favorite';
+                method = 'DELETE';
+                bodyData = { 
+                    idUsuario: userId,
+                    idPelicula: id 
+                };
+                break;
+            default:
+                return;
+        }
+    
         Swal.fire({
             title: '¿Estás seguro?',
             text: "¡No podrás revertir esto!",
@@ -255,12 +272,29 @@ export default function ListaReview() {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    // Aquí deberías implementar la llamada al endpoint de eliminación
-                    // Por ahora solo actualizamos el estado local
-                    setLists(prev => ({
-                        ...prev,
-                        [listType]: prev[listType].filter(item => item.id !== id)
-                    }));
+                    const response = await fetch(endpoint, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(bodyData)
+                    });
+    
+                    if (!response.ok) {
+                        throw new Error('Error al eliminar');
+                    }
+                    if(isReview){
+                        fetchData();
+                        isReview=false;
+                    }
+                    else{
+                        setLists(prev => ({
+                            ...prev,
+                            [listType]: prev[listType].filter(item => item.id !== id)
+                        }));
+                    }
+                    
                     
                     Swal.fire(
                         '¡Eliminado!',
@@ -270,35 +304,12 @@ export default function ListaReview() {
                 } catch (error) {
                     Swal.fire(
                         'Error',
-                        'No se pudo eliminar el elemento',
+                        'No se pudo eliminar el elemento: ' + error.message,
                         'error'
                     );
                 }
             }
         });
-    };
-
-    const handleEditReview = (review) => {
-        setEditingReview(review.id);
-        setEditedReviewText(review.review);
-    };
-
-    const saveEditedReview = async (id) => {
-        try {
-            // Aquí deberías implementar la llamada al endpoint de actualización
-            // Por ahora solo actualizamos el estado local
-            setLists(prev => ({
-                ...prev,
-                reviews: prev.reviews.map(review => 
-                    review.id === id ? { ...review, review: editedReviewText } : review
-                )
-            }));
-            
-            setEditingReview(null);
-            Swal.fire('¡Guardado!', 'Tu reseña ha sido actualizada.', 'success');
-        } catch (error) {
-            Swal.fire('Error', 'No se pudo actualizar la reseña', 'error');
-        }
     };
 
     const handleEditMovie = (movie) => {
@@ -383,49 +394,46 @@ export default function ListaReview() {
             }
       
             return {
-              title: title,
+              id: movie.id,
+              titulo: title,
               director: document.getElementById('swal-director').value.trim(),
-              year: parseInt(document.getElementById('swal-year').value) || null,
-              duration: parseInt(document.getElementById('swal-duration').value) || null,
-              rating: document.getElementById('swal-rating').value,
-              cast: document.getElementById('swal-cast').value.trim(),
-              synopsis: document.getElementById('swal-synopsis').value.trim(),
+              año: parseInt(document.getElementById('swal-year').value) || null,
+              duracion: parseInt(document.getElementById('swal-duration').value) || null,
+              clasificacion: document.getElementById('swal-rating').value,
+              reparto: document.getElementById('swal-cast').value.trim(),
+              sinopsis: document.getElementById('swal-synopsis').value.trim(),
               trailer: document.getElementById('swal-trailer').value.trim(),
-              Id_categoria: document.getElementById('swal-category').value || null,
-              category: categories.find(c => c.Id == document.getElementById('swal-category').value)?.Nombre || ''
+              categoria: document.getElementById('swal-category').value || null,
             };
           },
           didOpen: () => {
-            // Añade estilos adicionales
             document.querySelector('.swal2-popup').style.padding = '1.5em';
           }
         }).then(async (result) => {
           if (result.isConfirmed) {
             try {
-              // Aquí deberías implementar la llamada al endpoint de actualización
-              const updatedMovie = {
-                ...movie,
-                ...result.value
-              };
-      
-              // Ejemplo de llamada API (debes implementar tu propia función)
-              // await updateMovieAPI(movie.id, updatedMovie);
-      
-              // Actualización del estado local
-              setLists(prev => ({
-                ...prev,
-                addedMovies: prev.addedMovies.map(m => 
-                  m.id === movie.id ? updatedMovie : m
-                )
-              }));
-              
-              Swal.fire({
-                title: '¡Actualizado!',
-                text: 'La película ha sido editada correctamente',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
-              });
+                const response = await fetch('http://localhost:3001/popCornReview/updateMovie', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(result.value)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error al actualizar la película');
+                }
+                fetchData();
+                
+                Swal.fire({
+                    title: '¡Actualizado!',
+                    text: 'La película ha sido editada correctamente',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             } catch (error) {
               Swal.fire({
                 title: 'Error',
@@ -436,49 +444,65 @@ export default function ListaReview() {
           }
         });
       };
+
     const handleEditCategory = (category) => {
         Swal.fire({
             title: 'Editar Categoría',
             html: `
-            <div class="col-md">
-               <input id="swal-name" class="form-control  swal2-input" value="${category.name}" placeholder="Nombre">
-                <textarea id="swal-description" class="form-control swal2-textarea" placeholder="Descripción">${category.description}</textarea>
-           </div>
-                `,
+                <div class="col-md">
+                    <input id="swal-name" class="form-control swal2-input" value="${category.name}" placeholder="Nombre">
+                    <textarea id="swal-description" class="form-control swal2-textarea" placeholder="Descripción">${category.description}</textarea>
+                </div>
+            `,
             focusConfirm: false,
             preConfirm: () => {
                 return {
-                    name: document.getElementById('swal-name').value,
-                    description: document.getElementById('swal-description').value
+                    id: category.id,
+                    nombre: document.getElementById('swal-name').value,
+                    descripcion: document.getElementById('swal-description').value
                 };
             }
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    // Aquí deberías implementar la llamada al endpoint de actualización
-                    // Por ahora solo actualizamos el estado local
+                    const response = await fetch('http://localhost:3001/popCornReview/updateCategorie', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(result.value)
+                    });
+    
+                    if (!response.ok) {
+                        throw new Error('Error al actualizar la categoría');
+                    }
+    
                     setLists(prev => ({
                         ...prev,
                         customCategories: prev.customCategories.map(c => 
                             c.id === category.id ? { 
                                 ...c, 
-                                name: result.value.name,
-                                description: result.value.description
+                                name: result.value.nombre,
+                                description: result.value.descripcion
                             } : c
                         )
                     }));
                     
                     Swal.fire('¡Actualizado!', 'La categoría ha sido editada.', 'success');
                 } catch (error) {
-                    Swal.fire('Error', 'No se pudo actualizar la categoría', 'error');
+                    Swal.fire('Error', 'No se pudo actualizar la categoría: ' + error.message, 'error');
                 }
             }
         });
     };
+    
 
     const handleBack = () => {
         navigate(-1);
     };
+
+    
 
     if (loading) {
         return (
