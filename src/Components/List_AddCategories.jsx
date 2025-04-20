@@ -37,10 +37,6 @@ const List_AddCategories = ({
                   <FaList />
                   <span>{category.movieCount} películas</span>
                 </div>
-                <div className="stat-item">
-                  <FaHeart />
-                  <span>{category.followers} seguidores</span>
-                </div>
               </div>
               <div className="category-actions d-flex flex-column gap-3">
                 <button 

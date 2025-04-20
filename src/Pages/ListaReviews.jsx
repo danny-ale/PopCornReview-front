@@ -14,6 +14,8 @@ export default function ListaReview() {
     const [editingReview, setEditingReview] = useState(null);
     const [editedReviewText, setEditedReviewText] = useState('');
     const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState([]); 
+    const [loadingCategories, setLoadingCategories] = useState(true);
     const [error, setError] = useState(null);
     
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -28,13 +30,50 @@ export default function ListaReview() {
         customCategories: []
     });
 
+    const fetchCategories = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No se encontró token de autenticación');
+            }
+
+            const response = await fetch('http://localhost:3001/popCornReview/getAll/categories', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al obtener categorías');
+            }
+
+            setCategories(data.data); 
+            setLoadingCategories(false);
+        } catch (error) {
+            console.error('Error al obtener categorías:', error);
+            setError(error.message);
+            setLoadingCategories(false);
+        }
+    };
+
 
     const processImage = (bufferData) => {
         if (!bufferData || !bufferData.data) return null;
         try {
-            const base64String = btoa(
-                String.fromCharCode(...new Uint8Array(bufferData.data))
-            );
+            const uint8Array = new Uint8Array(bufferData.data);
+            let binaryString = '';
+            const chunkSize = 8192; 
+            
+            for (let i = 0; i < uint8Array.length; i += chunkSize) {
+                const chunk = uint8Array.subarray(i, i + chunkSize);
+                binaryString += String.fromCharCode.apply(null, chunk);
+            }
+            
+            const base64String = btoa(binaryString);
             return `data:image/jpeg;base64,${base64String}`;
         } catch (error) {
             console.error("Error processing image:", error);
@@ -44,6 +83,8 @@ export default function ListaReview() {
 
 
     const fetchData = async () => {
+        fetchCategories();
+
         if (!userId) {
             setError('Usuario no identificado');
             setLoading(false);
@@ -99,24 +140,24 @@ export default function ListaReview() {
                     id: movie.Id,
                     title: movie.Titulo,
                     year: movie.Año_Lanzamiento,
+                    duration: movie.Duración_Min,
                     rating: movie.Clasificación,
                     director: movie.Director,
+                    cast: movie.Reparto,
+                    synopsis: movie.Sinopsis,
                     poster: processImage(movie.Portada),
-                    genres: [movie.Id_categoria], // Aquí podrías mapear el ID a nombre de categoría
-                    runtime: movie.Duración_Min,
-                    addedDate: new Date().toISOString(), // No viene en el endpoint, usar fecha actual
-                    contributors: 1, // Valor por defecto
-                    isPublic: true // Valor por defecto
+                    trailer: movie.Trailer,
+                    category: movie.NombreCategoria,
+                    contributors: 1, 
+                    isPublic: true 
                 })) || [],
                 
                 customCategories: categoriesData.data?.map(category => ({
                     id: category.Id,
                     name: category.Nombre,
                     description: category.Descripcion,
-                    movieCount: 0, // No viene en el endpoint, podrías contar películas por categoría
-                    createdDate: new Date().toISOString(), // No viene en el endpoint
-                    isPublic: true, // Valor por defecto
-                    followers: 0 // Valor por defecto
+                    movieCount: category.CantidadPeliculas, 
+                    isPublic: true
                 })) || [],
                 
                 favorites: favoritesData.data?.map(fav => ({
@@ -126,10 +167,10 @@ export default function ListaReview() {
                     rating: fav.Clasificación,
                     director: fav.Director,
                     poster: processImage(fav.Portada),
-                    genres: [fav.Id_categoria], // Mapear ID a nombre de categoría
+                    genres: [fav.Id_categoria],
                     runtime: fav.Duración_Min,
                     userRating: fav.Puntuacion_Media ? parseFloat(fav.Puntuacion_Media) : null,
-                    addedDate: new Date().toISOString() // No viene en el endpoint
+                    addedDate: fav.Fecha_Agregado 
                 })) || [],
                 
                 reviews: reviewsData.data?.map(review => ({
@@ -139,7 +180,7 @@ export default function ListaReview() {
                     rating: review.Clasificación,
                     director: review.Director,
                     poster: processImage(review.Portada),
-                    genres: [], // No viene en el endpoint
+                    genres: [], 
                     runtime: review.Duración_Min,
                     review: review.Contenido,
                     userRating: review.Calificación,
@@ -245,52 +286,148 @@ export default function ListaReview() {
 
     const handleEditMovie = (movie) => {
         Swal.fire({
-            title: 'Editar Película',
-            html: `
-                <input id="swal-title" class="swal2-input" value="${movie.title}" placeholder="Título">
-                <input id="swal-director" class="swal2-input" value="${movie.director}" placeholder="Director">
-                <input id="swal-year" class="swal2-input" type="number" value="${movie.year}" placeholder="Año">
-            `,
-            focusConfirm: false,
-            preConfirm: () => {
-                return {
-                    title: document.getElementById('swal-title').value,
-                    director: document.getElementById('swal-director').value,
-                    year: document.getElementById('swal-year').value
-                };
+          title: 'Editar Película',
+          html: `
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="swal-title" class="form-label">Título</label>
+                <input id="swal-title" class="form-control swal2-input" value="${movie.title || ''}" placeholder="Título" required>
+              </div>
+              <div class="col-md-6">
+                <label for="swal-director" class="form-label">Director</label>
+                <input id="swal-director" class="form-control swal2-input" value="${movie.director || ''}" placeholder="Director">
+              </div>
+              <div class="col-md-4">
+                <label for="swal-year" class="form-label">Año</label>
+                <input id="swal-year" class="form-control swal2-input" type="number" 
+                       value="${movie.year || ''}" 
+                       min="1900" max="${new Date().getFullYear() + 2}" 
+                       placeholder="Año">
+              </div>
+              <div class="col-md-4">
+                <label for="swal-duration" class="form-label">Duración (min)</label>
+                <input id="swal-duration" class="form-control swal2-input" type="number" 
+                       value="${movie.duration || ''}" 
+                       min="1" max="600" 
+                       placeholder="Duración">
+              </div>
+              <div class="col-md-4">
+                <label for="swal-rating" class="form-label">Clasificación</label>
+                <select id="swal-rating" class="form-select swal2-select">
+                  <option value="G" ${movie.rating === 'G' ? 'selected' : ''}>G</option>
+                  <option value="PG" ${movie.rating === 'PG' ? 'selected' : ''}>PG</option>
+                  <option value="PG-13" ${movie.rating === 'PG-13' ? 'selected' : ''}>PG-13</option>
+                  <option value="R" ${movie.rating === 'R' ? 'selected' : ''}>R</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label for="swal-cast" class="form-label">Reparto</label>
+                <input id="swal-cast" class="form-control swal2-input" 
+                       value="${movie.cast || ''}" 
+                       placeholder="Actor 1, Actor 2, Actor 3">
+              </div>
+              <div class="col-12">
+                <label for="swal-synopsis" class="form-label">Sinopsis</label>
+                <textarea id="swal-synopsis" class="form-control swal2-textarea" rows="3"
+                          placeholder="Sinopsis">${movie.synopsis || ''}</textarea>
+              </div>
+              <div class="col-md-6">
+                <label for="swal-trailer" class="form-label">URL del Tráiler</label>
+                <input id="swal-trailer" class="form-control swal2-input" type="url"
+                       value="${movie.trailer || ''}" 
+                       placeholder="https://www.youtube.com/watch?v=...">
+              </div>
+               <div class="col-md-6">
+                <label for="swal-category" class="form-label">Categoría</label>
+                <select id="swal-category" class="form-select swal2-select">
+                    ${categories.map(category => `
+                    <option 
+                        value="${category.Id}" 
+                        ${movie.Id_categoria == category.Id ? 'selected' : ''}
+                        ${!movie.Id_categoria && category.Nombre === movie.category ? 'selected' : ''}
+                    >
+                        ${category.Nombre}
+                    </option>
+                    `).join('')}
+                </select>
+                </div>
+            </div>
+          `,
+          focusConfirm: false,
+          showCancelButton: true,
+          confirmButtonText: 'Guardar',
+          cancelButtonText: 'Cancelar',
+          width: '800px',
+          preConfirm: () => {
+            const title = document.getElementById('swal-title').value.trim();
+            if (!title) {
+              Swal.showValidationMessage('El título es requerido');
+              return false;
             }
+      
+            return {
+              title: title,
+              director: document.getElementById('swal-director').value.trim(),
+              year: parseInt(document.getElementById('swal-year').value) || null,
+              duration: parseInt(document.getElementById('swal-duration').value) || null,
+              rating: document.getElementById('swal-rating').value,
+              cast: document.getElementById('swal-cast').value.trim(),
+              synopsis: document.getElementById('swal-synopsis').value.trim(),
+              trailer: document.getElementById('swal-trailer').value.trim(),
+              Id_categoria: document.getElementById('swal-category').value || null,
+              category: categories.find(c => c.Id == document.getElementById('swal-category').value)?.Nombre || ''
+            };
+          },
+          didOpen: () => {
+            // Añade estilos adicionales
+            document.querySelector('.swal2-popup').style.padding = '1.5em';
+          }
         }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    // Aquí deberías implementar la llamada al endpoint de actualización
-                    // Por ahora solo actualizamos el estado local
-                    setLists(prev => ({
-                        ...prev,
-                        addedMovies: prev.addedMovies.map(m => 
-                            m.id === movie.id ? { 
-                                ...m, 
-                                title: result.value.title,
-                                director: result.value.director,
-                                year: result.value.year
-                            } : m
-                        )
-                    }));
-                    
-                    Swal.fire('¡Actualizado!', 'La película ha sido editada.', 'success');
-                } catch (error) {
-                    Swal.fire('Error', 'No se pudo actualizar la película', 'error');
-                }
+          if (result.isConfirmed) {
+            try {
+              // Aquí deberías implementar la llamada al endpoint de actualización
+              const updatedMovie = {
+                ...movie,
+                ...result.value
+              };
+      
+              // Ejemplo de llamada API (debes implementar tu propia función)
+              // await updateMovieAPI(movie.id, updatedMovie);
+      
+              // Actualización del estado local
+              setLists(prev => ({
+                ...prev,
+                addedMovies: prev.addedMovies.map(m => 
+                  m.id === movie.id ? updatedMovie : m
+                )
+              }));
+              
+              Swal.fire({
+                title: '¡Actualizado!',
+                text: 'La película ha sido editada correctamente',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            } catch (error) {
+              Swal.fire({
+                title: 'Error',
+                text: 'No se pudo actualizar la película: ' + (error.message || ''),
+                icon: 'error'
+              });
             }
+          }
         });
-    };
-
+      };
     const handleEditCategory = (category) => {
         Swal.fire({
             title: 'Editar Categoría',
             html: `
-                <input id="swal-name" class="swal2-input" value="${category.name}" placeholder="Nombre">
-                <textarea id="swal-description" class="swal2-textarea" placeholder="Descripción">${category.description}</textarea>
-            `,
+            <div class="col-md">
+               <input id="swal-name" class="form-control  swal2-input" value="${category.name}" placeholder="Nombre">
+                <textarea id="swal-description" class="form-control swal2-textarea" placeholder="Descripción">${category.description}</textarea>
+           </div>
+                `,
             focusConfirm: false,
             preConfirm: () => {
                 return {

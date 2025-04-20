@@ -31,11 +31,6 @@ const List_ReviewsMovies = ({ reviews, onEditReview, onDeleteReview }) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const handleEditClick = (review) => {
-    setEditingReview(review.id);
-    setEditedReviewText(review.review);
-    //onEditReview(review);
-  };
 
   const handleSave = (id) => {
     onEditReview({ id, review: editedReviewText });
@@ -102,12 +97,6 @@ const List_ReviewsMovies = ({ reviews, onEditReview, onDeleteReview }) => {
           </div>
           {editingReview !== movie.id && (
             <div className="review-actions">
-              <button 
-                className="action-btn edit-btn"
-                onClick={() => handleEditClick(movie)}
-              >
-                <FaEdit /> Editar
-              </button>
               <button 
                 className="action-btn delete-btn"
                 onClick={() => onDeleteReview('reviews', movie.id)}
