@@ -34,19 +34,11 @@ function App() {
         <Route path="/Home" element={<Home />} />
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        
-        <Route path="/Registro" element={
-          <ProtectedRoute>
-            <Registro />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/Imagenes" element={
-          <ProtectedRoute>
-            <Imagenes />
-          </ProtectedRoute>
-        } />
-        
+        <Route path="/result" element={<Result />} />
+        <Route path="/Registro" element={<Registro />} />
+        <Route path="/movie/:userId/:movieId" element={<MovieDetail />} />
+
+
         <Route path="/Perfil" element={
           <ProtectedRoute>
             <Perfil />
@@ -71,17 +63,6 @@ function App() {
           </ProtectedRoute>
         } />
         
-        <Route path="/result" element={
-          <ProtectedRoute>
-            <Result />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/movie/:userId/:movieId" element={
-          <ProtectedRoute>
-            <MovieDetail />
-          </ProtectedRoute>
-        } />
         
         <Route path="*" element={<NotFound />} />
       </Routes>

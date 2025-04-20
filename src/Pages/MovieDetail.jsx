@@ -4,6 +4,9 @@ import { Container, Row, Col, Card, Button, Form, Badge, Tab, Tabs, ListGroup, A
 import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaThumbsUp, FaThumbsDown, FaArrowLeft, FaEdit } from 'react-icons/fa';
 import '../css/MovieDetail.css';
 import YouTubeVideo from '../Components/YouTubeVideo';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Bounce } from "react-toastify";
 
 const movieData = {
   id: null,
@@ -35,77 +38,76 @@ export default function MovieDetail() {
   const [isFavorite, setIsFavorite] = useState(movie?.isFavorite || false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
 
+  const fetchMovieDetails = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
 
-  useEffect(() => {
-    const fetchMovieDetails = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const headers = {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        };
+      const response = await fetch(
+        `http://localhost:3001/popCornReview/getDetailMovie/${userId}/${movieId}`,
+        { headers }
+      );
 
-        const response = await fetch(
-          `http://localhost:3001/popCornReview/getDetailMovie/${userId}/${movieId}`,
-          { headers }
-        );
+      if (!response.ok) {
+        throw new Error('Error al obtener detalles de la película');
+      }
 
-        if (!response.ok) {
-          throw new Error('Error al obtener detalles de la película');
-        }
-
-        const apiData = await response.json();
-        
-        const transformedData = {
-          id: apiData.data.pelicula.Id,
-          title: apiData.data.pelicula.Titulo,
-          image: apiData.data.pelicula.Portada 
-            ? `data:image/jpeg;base64,${arrayBufferToBase64(apiData.data.pelicula.Portada.data)}` 
-            : 'https://via.placeholder.com/300x450?text=No+Image',
-          year: apiData.data.pelicula.Año_Lanzamiento,
-          director: apiData.data.pelicula.Director,
-          rating: parseFloat(apiData.data.pelicula.Promedio_Estrellas) || 0,
-          approval: apiData.data.pelicula.Porcentaje_Pos 
-            ? parseFloat(apiData.data.pelicula.Porcentaje_Pos) 
-            : 0,
-          duration: `${apiData.data.pelicula.Duración_Min} min`,
-          trailer: extractYoutubeId(apiData.data.pelicula.Trailer),
-          genre: [apiData.data.pelicula.Nombre_Categoria],
-          cast: processCast(apiData.data.pelicula.Reparto),
-          synopsis: apiData.data.pelicula.Sinopsis,
-          reviews: apiData.data.resenas.map(review => ({
-            id: review.IdReseña,
-            author: review.Nombre_Usuario,
-            rating: review.Calificación,
-            date: new Date(review.Fecha).toLocaleDateString('es-ES', {
+      const apiData = await response.json();
+      
+      const transformedData = {
+        id: apiData.data.pelicula.Id,
+        title: apiData.data.pelicula.Titulo,
+        image: apiData.data.pelicula.Portada 
+          ? `data:image/jpeg;base64,${arrayBufferToBase64(apiData.data.pelicula.Portada.data)}` 
+          : 'https://via.placeholder.com/300x450?text=No+Image',
+        year: apiData.data.pelicula.Año_Lanzamiento,
+        director: apiData.data.pelicula.Director,
+        rating: parseFloat(apiData.data.pelicula.Promedio_Estrellas) || 0,
+        approval: apiData.data.pelicula.Porcentaje_Pos 
+          ? parseFloat(apiData.data.pelicula.Porcentaje_Pos) 
+          : 0,
+        duration: `${apiData.data.pelicula.Duración_Min} min`,
+        trailer: extractYoutubeId(apiData.data.pelicula.Trailer),
+        genre: [apiData.data.pelicula.Nombre_Categoria],
+        cast: processCast(apiData.data.pelicula.Reparto),
+        synopsis: apiData.data.pelicula.Sinopsis,
+        reviews: apiData.data.resenas.map(review => ({
+          id: review.IdReseña,
+          author: review.Nombre_Usuario,
+          rating: review.Calificación,
+          date: new Date(review.Fecha).toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
+          comment: review.Contenido,
+          likes: review.Recomendada === 1 ? 1 : 0,
+          dislikes: review.Recomendada === 0 ? 1 : 0,
+          userComments: review.comentarios.map(comment => ({
+            id: comment.IdComentario,
+            author: comment.Nombre_Usuario || `Usuario ${comment.Id_Usuario}`,
+            comment: comment.Contenido,
+            date: new Date(comment.Fecha).toLocaleDateString('es-ES', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
-            }),
-            comment: review.Contenido,
-            likes: review.Recomendada === 1 ? 1 : 0,
-            dislikes: review.Recomendada === 0 ? 1 : 0,
-            userComments: review.comentarios.map(comment => ({
-              id: comment.IdComentario,
-              author: comment.Nombre_Usuario || `Usuario ${comment.Id_Usuario}`,
-              comment: comment.Contenido,
-              date: new Date(comment.Fecha).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })
-            }))
-          })),
-          isFavorite: apiData.data.pelicula.EstaEnFavoritos === 1
-        };
-        setMovie(transformedData);
-      } catch (err) {
-        console.log(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+            })
+          }))
+        })),
+        isFavorite: apiData.data.pelicula.EstaEnFavoritos === 1
+      };
+      setMovie(transformedData);
+    } catch (err) {
+      console.log(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchMovieDetails();
   }, [userId, movieId]);
 
@@ -161,7 +163,17 @@ export default function MovieDetail() {
     }
 
     if (review.rating === 0 || review.comment.trim() === '' || review.liked === null) {
-      alert('Por favor completa todos los campos de la reseña: calificación, comentario y si recomiendas la película');
+      toast.warn('Por favor completa todos los campos de la reseña: calificación, comentario y si recomiendas la película', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
       return; 
     }
 
@@ -190,26 +202,7 @@ export default function MovieDetail() {
       await response.json();
       const tempId = Date.now();
   
-      setMovie(prevMovie => ({
-        ...prevMovie,
-        reviews: [
-          {
-            id: tempId,
-            author: userName,
-            rating: review.rating,
-            date: new Date().toLocaleDateString('es-ES', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }),
-            comment: review.comment,
-            likes: review.liked ? 1 : 0,
-            dislikes: review.liked ? 0 : 1,
-            userComments: []
-          },
-          ...prevMovie.reviews
-        ]
-      }));
+      fetchMovieDetails();
   
       setReview({
         rating: 0,
@@ -219,7 +212,17 @@ export default function MovieDetail() {
   
     } catch (error) {
       console.error('Error:', error);
-      alert('Hubo un error al enviar tu reseña');
+      toast.error('Hubo un error al enviar tu reseña', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+    });
     } finally {
       setIsSubmitting(false);
     }
@@ -247,7 +250,17 @@ export default function MovieDetail() {
     const commentText = comments[reviewId] || '';
   
     if (!commentText.trim()) {
-      alert('El comentario no puede estar vacío');
+      toast.error('El comentario no puede estar vacío', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+    });
       return;
     }
   
@@ -305,7 +318,17 @@ export default function MovieDetail() {
   
     } catch (error) {
       console.error('Error:', error);
-      alert('Hubo un error al enviar tu comentario');
+      toast.error('Hubo un error al enviar tu comentario.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+    });
     }
   };
 
@@ -320,7 +343,17 @@ export default function MovieDetail() {
     const userId = userData?.userId;
   
     if (!userId) {
-      alert('Debes iniciar sesión para gestionar favoritos');
+      toast.error('Debes iniciar sesión para gestionar favoritos.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+    });
       return;
     }
   
@@ -355,7 +388,17 @@ export default function MovieDetail() {
   
     } catch (error) {
       console.error('Error:', error);
-      alert(`Hubo un error al ${movie?.isFavorite ? 'quitar' : 'agregar'} la película de favoritos`);
+      toast.error(`Hubo un error al ${movie?.isFavorite ? 'quitar' : 'agregar'} la película de favoritos`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+    });
     } finally {
       setIsFavoriteLoading(false);
     }

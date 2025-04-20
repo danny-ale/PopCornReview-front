@@ -113,13 +113,12 @@ export default function PerfilUsuario() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    navigate('/result');
-  };
+    const searchInput = e.target.elements.search?.value || search; 
+    if(searchInput.trim()) {
+      navigate(`/result?query=${encodeURIComponent(searchInput.trim())}`);
+    }
+};
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    navigate('/');
-  };
 
   const handleEditProfile = () => {
     setEditData({
@@ -231,10 +230,28 @@ export default function PerfilUsuario() {
     return new Date(dateString).toLocaleDateString('es-ES', options);
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    navigate('/login');
-  };
+ const handleLogin = () => {
+     setIsLoggedIn(true);
+     navigate('/login');
+   };
+ 
+   const handleLogout = () => {
+     localStorage.removeItem('token');
+     localStorage.removeItem('userData');
+     setIsLoggedIn(false);
+     navigate('/');
+     toast.success('Has cerrado sesión correctamente', {
+       position: "top-right",
+       autoClose: 5000,
+       hideProgressBar: false,
+       closeOnClick: false,
+       pauseOnHover: true,
+       draggable: true,
+       progress: undefined,
+       theme: "dark",
+       transition: Bounce,
+   });
+   };
 
 
   const validateEditForm = () => {
@@ -312,7 +329,7 @@ export default function PerfilUsuario() {
                 </div>
                 </Form>
 
-                {isLoggedIn ? (
+                {localStorage.getItem('token') ? (
                 <Dropdown align="end">
                     <Dropdown.Toggle variant="dark" id="dropdown-user">
                     <div className="d-flex align-items-center">

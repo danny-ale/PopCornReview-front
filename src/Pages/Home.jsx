@@ -8,10 +8,13 @@ import FeaturedMovies from '../Components/Card_FeaturedMovies';
 import TopRatedMovies from '../Components/Card_TopRatedMovies';
 import MostReviewedMovies from '../Components/Card_MostReviewMovie';
 import NewlyAddedMovies from '../Components/Card_NewlyMovies';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Bounce } from "react-toastify";
 
 export default function Home() {
   const [search, setSearch] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [featuredMovies, setFeaturedMovies] = useState([]);
   const [topRatedMovies, setTopRatedMovies] = useState([]);
@@ -137,15 +140,15 @@ export default function Home() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if(search.trim()) {
-      navigate('/result');
+    const searchInput = e.target.elements.search?.value || search; 
+    if(searchInput.trim()) {
+      navigate(`/result?query=${encodeURIComponent(searchInput.trim())}`);
     }
-  };
+};
 
   const navigateToMovie = (movieId) => {
     const userData = JSON.parse(localStorage.getItem('userData'));
     const userId = userData?.userId;
-    //console.log(`User ID: ${userId}, Movie ID: ${movieId}`);
     if(userId==null){
       navigate('/login');
       return;
@@ -160,8 +163,21 @@ export default function Home() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
     setIsLoggedIn(false);
     navigate('/');
+    toast.success('Has cerrado sesión correctamente', {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+  });
   };
 
 const carouselItems = [
@@ -223,7 +239,7 @@ const carouselItems = [
               </div>
             </Form>
 
-            {isLoggedIn ? (
+            {localStorage.getItem('token') ? (
               <Dropdown align="end">
                 <Dropdown.Toggle variant="dark" id="dropdown-user">
                   <div className="d-flex align-items-center">
